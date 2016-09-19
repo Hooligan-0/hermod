@@ -143,38 +143,56 @@ public:
     void print( const std::string & text );
 };
 
+class OutputVector : public Output {
+public:
+    OutputVector(std::vector<unsigned char> *vec);
+    void print( const std::string & text );
+protected:
+    std::vector<unsigned char> *mVector;
+};
 
 class Loader {
 public:
+    Loader();
     virtual ~Loader();
-    // Returns mallocated memory that the consumer must free()
-    virtual const char * load( const char *name ) = 0;
+    virtual const char *get(void);
+    virtual Loader *getInclude(void) = 0;
+    virtual bool load(const std::string &resourceName) = 0;
+protected:
+    char *mDataBuffer;
 };
-
 
 class LoaderFile : public Loader {
 public:
-    const char * load( const char *name );
+    LoaderFile();
+    bool    load(const std::string &filename);
+    Loader *getInclude(void);
+protected:
+    std::string mFilename;
+    std::string mPath;
 };
 
-
-
+/**
+ * @class Template
+ * @brief Main class to handle templates
+ *
+ * A Template object is the entry point to handle a templated page. The load()
+ * method allow to read a template file from local storage, and at the end the
+ * render() method should be called to generate the raw text of html page.
+ */
 class Template : public Block {
-protected:
-    Loader & loader;
     
 public:
-    Template( Loader & loader );
+    Template( );
     void clear();
-    void load( const char *name );
-    void render( Output & output ) const;
+    void loadFile(const std::string &filename);
+    void render  (Output & output) const;
+    void render  (std::vector<unsigned char> *vec) const;
     
 protected:
-    void load_recursive( const char *name, std::vector<Tokenizer*> & files, std::vector<Node*> & nodes );
+    void load(Loader *loader, std::vector<Tokenizer*> & files, std::vector<Node*> & nodes );
 };
 
-
-    
     } // namespace contentHtml
 } // namespace hermod
 #endif

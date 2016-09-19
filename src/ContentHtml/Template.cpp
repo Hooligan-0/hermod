@@ -20,7 +20,9 @@
 #include "Template.hpp"
 
 using namespace std;
-using namespace hermod::contentHtml;
+
+namespace hermod {
+	namespace contentHtml {
 
 enum {
     TOKEN_END,
@@ -114,6 +116,138 @@ static inline long match_tag_with_param( const char *tag, const char *text, stri
     
     return -1;
 }
+
+// ----------------------------------------------------------------------------
+// -- Template --
+// ----------------------------------------------------------------------------
+
+/**
+ * @brief Default constructor
+ *
+ */
+Template::Template( ) : Block( "main" )
+{
+	// Nothing more to do
+}
+
+/**
+ * @brief Clean (remove) all known items for the current template
+ *
+ */
+void Template::clear()
+{
+    for ( size_t i=0; i < fragments.size(); i++ ) {
+        delete fragments[ i ];
+    }
+    for ( size_t i=0; i < nodes.size(); i++ ) {
+        delete nodes[ i ];
+    }
+    nodes.clear();
+    fragments.clear();
+    properties.clear();
+}
+
+/**
+ * @brief Internal method to create the item tree from the raw template text
+ *
+ * @param loader Pointer to the Loader object used to read source data
+ * @param files  Reference to a Tokenizer vector used during load
+ * @param nodes  Reference to a Node vector used during load
+ */
+void Template::load(Loader *loader, std::vector<Tokenizer*> & files, std::vector<Node*> & nodes )
+{
+
+	try {
+		const char *buffer = loader->get();
+		Tokenizer *tokenizer = new Tokenizer( buffer );
+		files.push_back( tokenizer );
+	} catch (...) {
+		// ToDo: log error ?
+		return;
+	}
+    
+    bool done = false;
+    while( !done ) {
+        Token token = files.back()->next();
+        switch ( token.type ) {
+            case TOKEN_END:
+                done = true;
+                break;
+            case TOKEN_BLOCK: {
+                Block *block = new Block( token.value );
+                nodes.back()->fragments.push_back( block );
+                nodes.push_back( block );
+            }
+                break;
+            case TOKEN_ENDBLOCK:
+                nodes.pop_back();
+                break;
+            case TOKEN_VAR:
+                nodes.back()->fragments.push_back( new Property( token.value ) );
+                break;
+            case TOKEN_TEXT:
+                nodes.back()->fragments.push_back( new Text( token.value ) );
+                break;
+            case TOKEN_INCLUDE:
+                Loader *incLoader = 0;
+                try {
+                    incLoader = loader->getInclude();
+                    incLoader->load(token.value);
+                    load(incLoader, files, nodes );
+                    delete incLoader;
+                } catch (...) {
+                    if (incLoader)
+                        delete incLoader;
+                }
+                break;
+        }
+    }
+    
+    delete files.back();
+    files.pop_back();
+}
+
+/**
+ * @brief Read a template file and load it
+ *
+ * @param filename String that contains the file name (and path)
+ */
+void Template::loadFile(const std::string &filename)
+{
+    clear();
+    vector<Node*> stack;
+    stack.push_back( this );
+    
+    vector<Tokenizer*> file_stack;
+    
+    LoaderFile ldr;
+    ldr.load( filename.c_str() );
+
+    load(&ldr, file_stack, stack );
+}
+
+/**
+ * @brief Render recursively the item tree, and write data to an Output object
+ *
+ * @param output Reference to the Output object
+ */
+void Template::render( Output & output ) const
+{
+	Node::render( output, *this );
+}
+
+/**
+ * @brief Render recursively the item tree, and write data to a byte vector
+ *
+ * @param vec Pointer to the byte vector
+ */
+void Template::render( std::vector<unsigned char> *vec ) const
+{
+	OutputVector output(vec);
+	Node::render( output, *this );
+}
+
+// ----------------------------------------------------------------------------
 
 
 Tokenizer::Tokenizer( const char *text ) :
@@ -355,92 +489,79 @@ void OutputStdout::print( const std::string &text ) {
     cout << text;
 }
 
-
-Loader::~Loader() {
+OutputVector::OutputVector(std::vector<unsigned char> *vec)
+{
+    mVector = vec;
 }
 
-
-const char * LoaderFile::load( const char *name ) {
-    FILE *f = fopen( name, "rb" );
-    fseek( f, 0, SEEK_END );
-    long len = ftell( f );
-    fseek( f, 0, SEEK_SET );
-    char *buffer = (char*) malloc( len + 1 );
-    fread( (void*) buffer, len, 1, f );
-    fclose( f );
-    buffer[ len ] = 0;
-    return buffer;
+void OutputVector::print( const std::string &text )
+{
+	const char *str = text.c_str();
+	std::copy(str,
+	          str + text.length(),
+	          std::back_inserter(*mVector));
+	return;
 }
 
+// ----------------------------------------------------------------------------
+// --                              Data Loaders                              --
+// ----------------------------------------------------------------------------
 
-Template::Template( Loader & loader ) : Block( "main" ), loader( loader ) {
+Loader::Loader()
+{
+    mDataBuffer = 0;
 }
 
-
-void Template::load_recursive( const char *name, vector<Tokenizer*> & files, vector<Node*> & nodes ) {
-    Tokenizer *tokenizer = new Tokenizer( loader.load( name ) );
-    files.push_back( tokenizer );
-    
-    bool done = false;
-    while( !done ) {
-        Token token = files.back()->next();
-        switch ( token.type ) {
-            case TOKEN_END:
-                done = true;
-                break;
-            case TOKEN_BLOCK: {
-                Block *block = new Block( token.value );
-                nodes.back()->fragments.push_back( block );
-                nodes.push_back( block );
-            }
-                break;
-            case TOKEN_ENDBLOCK:
-                nodes.pop_back();
-                break;
-            case TOKEN_VAR:
-                nodes.back()->fragments.push_back( new Property( token.value ) );
-                break;
-            case TOKEN_TEXT:
-                nodes.back()->fragments.push_back( new Text( token.value ) );
-                break;
-            case TOKEN_INCLUDE:
-                load_recursive( token.value.c_str(), files, nodes );
-                break;
-        }
-    }
-    
-    delete files.back();
-    files.pop_back();
+Loader::~Loader()
+{
 }
 
+const char *Loader::get(void)
+{
+	if (mDataBuffer == 0)
+		throw -1;
 
-void Template::clear() {
-    for ( size_t i=0; i < fragments.size(); i++ ) {
-        delete fragments[ i ];
-    }
-    for ( size_t i=0; i < nodes.size(); i++ ) {
-        delete nodes[ i ];
-    }
-    nodes.clear();
-    fragments.clear();
-    properties.clear();
+	return mDataBuffer;
 }
 
-
-void Template::load( const char *name ) {
-    clear();
-    
-    vector<Node*> stack;
-    stack.push_back( this );
-    
-    vector<Tokenizer*> file_stack;
-    
-    load_recursive( name, file_stack, stack );
+LoaderFile::LoaderFile()
+{
 }
 
-
-void Template::render( Output & output ) const {
-    Node::render( output, *this );
+Loader *LoaderFile::getInclude(void)
+{
+    LoaderFile *inc = new LoaderFile;
+    inc->mPath = mPath;
+    return inc;
 }
 
+bool LoaderFile::load(const std::string &filename)
+{
+	std::string fullname(mPath);
+	fullname += filename;
+	FILE *f = fopen(fullname.c_str(), "rb" );
+	if (f == 0)
+		return false;
+	std::size_t sep = filename.rfind('/');
+	if (sep == std::string::npos)
+		mFilename = filename;
+	else
+	{
+	        mPath += filename.substr(0, sep + 1);
+	        mFilename = filename.substr(sep+1, std::string::npos);
+	}
+	
+	fseek( f, 0, SEEK_END );
+	long len = ftell( f );
+	fseek( f, 0, SEEK_SET );
+
+	mDataBuffer = (char*) malloc( len + 1 );
+	fread( (void*)mDataBuffer, len, 1, f );
+	fclose( f );
+	mDataBuffer[ len ] = 0;
+	return true;
+}
+
+	} // namespace contentHtml
+} // namespace hermod
 /* EOF */
