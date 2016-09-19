@@ -16,11 +16,13 @@
 #define CONTENTHTML_HPP
 #include "Content.hpp"
 #include "ContentHtml/HtmlElement.hpp"
+#include "ContentHtml/Template.hpp"
 
 namespace hermod {
 
 namespace contentHtml {
 class HtmlElement;
+class Template;
 }
 
 /**
@@ -32,11 +34,15 @@ class ContentHtml : public Content {
 public:
 	ContentHtml();
 	~ContentHtml();
+	void clean(void);
 	contentHtml::HtmlElement *root(void);
+	void setTemplate(contentHtml::Template *tpl);
+	contentHtml::Template    *tpl(void);
 protected:
 	void refresh(void);
 private:
 	contentHtml::HtmlElement *mRootElement;
+	contentHtml::Template    *mTemplate;
 };
 
 } // namespace hermod
