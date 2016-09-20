@@ -136,7 +136,6 @@ void Page::initSession(void)
 	std::string cfgSessionMode( cfg->get("global", "session_mode") );
 	if (cfgSessionMode.compare("cookie") == 0)
 	{
-		Log::info() << "Page: init Session using cookie" << Log::endl;
 		// Find Session ID using cookie
 		try {
 			std::string cookieName;
@@ -147,28 +146,31 @@ void Page::initSession(void)
 				cookieName = "HERMOD_SESSION";
 			try {
 				sessId = mRequest->getCookieByName(cookieName, false);
+				sess = sc->getById(sessId);
+				if (sess == 0)
+				{
+					Log::debug() << "Page: try to load an unknown session " << sessId << Log::endl;
+					throw -1;
+				}
+				Log::debug() << "Page: load session " << sessId << Log::endl;
 			} catch (...) {
 			}
-			Log::info() << "Page: cookie " << cookieName;
-			Log::info() << " = " << sessId << Log::endl;
-			sess = sc->getById(sessId);
-			if (sess)
+			
+			if ( ! sess)
 			{
-				Log::info() << "Page: Session found" << Log::endl;
-			}
-			else
-			{
-				Log::info() << "Page: Session not found" << Log::endl;
 				sess = sc->create();
 				if (sess == NULL)
 					throw runtime_error("Failed to create a new session");
 				std::string cookie( cookieName );
 				cookie += "=" + sess->getId();
 				mResponse->header()->addHeader("Set-Cookie", cookie);
+				Log::debug() << "Page: create session " << sess->getId() << Log::endl;
 			}
 			mSession = sess;
+		} catch (std::exception &e) {
+			Log::error() << "Page: Session error : " << e.what() << Log::endl;
 		} catch (...) {
-			Log::info() << "Page: Session cookie EXCEPTION" << Log::endl;
+			Log::error() << "Page: Session unknown error" << Log::endl;
 		}
 	}
 	else if (cfgSessionMode.compare("token") == 0)

@@ -16,7 +16,6 @@
 #define APP_HPP
 #include "ModuleCache.hpp"
 #include "Router.hpp"
-#include "Session.hpp"
 
 namespace hermod {
 
@@ -48,7 +47,6 @@ private:
 	bool         mRunning;
 	int          mFcgxSock;
 	Router      *mRouter;
-	Session     *mSession;
 	ModuleCache  mModuleCache;
 };
 

@@ -81,7 +81,8 @@ std::string Request::getCookieByName(const std::string &name, bool allowEmpty = 
 				break;
 		}
 	} catch (std::exception &e) {
-		Log::info() << "Request::getCookieByName " << e.what() << Log::endl;
+		Log::debug() << "Request::getCookieByName " << name;
+		Log::debug() << " : " << e.what() << Log::endl;
 	}
 
 	if ( value.empty() && (allowEmpty == false) )

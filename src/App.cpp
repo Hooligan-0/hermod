@@ -44,7 +44,6 @@ App::App()
 	mRunning  = false;
 	mFcgxSock = -1;
 	mRouter   = NULL;
-	mSession  = NULL;
 }
 
 /**

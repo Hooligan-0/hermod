@@ -114,7 +114,6 @@ void Session::save(void)
 	ostringstream dat;
 	
 	sfile.open(mFilename.c_str(), ios::out | ios::trunc);
-	std::cerr << "session::save() to " << mFilename << std::endl;
 	
 	if ( ! sfile.is_open())
 		throw runtime_error("Session: Could not open the file!");
