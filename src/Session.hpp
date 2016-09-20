@@ -19,6 +19,15 @@
 
 using namespace std;
 
+/**
+ * @class Session
+ * @brief This class manage one user session
+ *
+ * A session is a named collection of key/value array. This allow to track and
+ * save user data across multiple requests. A Session object can be standalone,
+ * but the general case is to put them into a SessionCache to keep them into
+ * memory. When a Session object is deleted, the array is saved to a file.
+ */
 class Session
 {
 public:

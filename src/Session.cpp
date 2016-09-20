@@ -26,6 +26,10 @@
 using namespace hermod;
 using namespace std;
 
+/**
+ * @brief Default constructor
+ *
+ */
 Session::Session()
 {
 	mCache.clear();
@@ -34,6 +38,10 @@ Session::Session()
 	mCount = 1;
 }
 
+/**
+ * @brief TEMPORARY - This method clear all entries with a key name that start with "key_"
+ *
+ */
 void Session::clearFileKey(void)
 {
 	for( map<string,string>::iterator ii=mCache.begin(); ii!=mCache.end(); ++ii)
@@ -46,6 +54,12 @@ void Session::clearFileKey(void)
 	}
 }
 
+/**
+ * @brief Initialize a new session
+ *
+ * This method initialize the current object as new session. A new ID is created
+ * and the name of the file used to save datas is computed (but not created)
+ */
 void Session::create(void)
 {
 	ostringstream convert;
@@ -67,6 +81,11 @@ void Session::create(void)
 	mIsNew = true;
 }
 
+/**
+ * @brief Load a session from a file
+ *
+ * @param key Id of the session to load
+ */
 void Session::load(string key)
 {
 	struct stat buffer;
@@ -108,6 +127,10 @@ void Session::load(string key)
 	mIsNew = false;
 }
 
+/**
+ * @brief Save the session into a file
+ *
+ */
 void Session::save(void)
 {
 	fstream sfile;
@@ -128,11 +151,22 @@ void Session::save(void)
 	sfile.close();
 }
 
+/**
+ * @brief Get the session ID
+ *
+ * @return string The session ID
+ */
 string Session::getId(void)
 {
 	return mKey;
 }
 
+/**
+ * @brief Get the value of a key, identified by his key name
+ *
+ * @param key Name of the key
+ * @return string Value of the key as string
+ */
 std::string Session::getKey(const std::string &key)
 {
 	for( map<string,string>::iterator ii=mCache.begin(); ii!=mCache.end(); ++ii)
@@ -145,6 +179,12 @@ std::string Session::getKey(const std::string &key)
 	return std::string("");
 }
 
+/**
+ * @brief Get the numeric value of a key
+ *
+ * @param key Name of the key
+ * @return int Value of the key as integer
+ */
 int Session::getKeyInt(const std::string &key)
 {
 	std::string strValue = getKey(key);
@@ -152,11 +192,23 @@ int Session::getKeyInt(const std::string &key)
 	return intValue;
 }
 
+/**
+ * @brief Set the value of a key
+ *
+ * @param key Name of the key to update
+ * @param value New value to set
+ */
 void Session::setKey(const std::string &key, const std::string &value)
 {
 	mCache[ key ] = value;
 }
 
+/**
+ * @brief Set the value of a key (numeric)
+ *
+ * @param key Name of the key to update
+ * @param value New value to set (long int)
+ */
 void Session::setKey(const std::string &key, unsigned long value)
 {
 	ostringstream temp;
@@ -164,6 +216,11 @@ void Session::setKey(const std::string &key, unsigned long value)
 	mCache[ key ] = temp.str();
 }
 
+/**
+ * @brief Remove a key
+ *
+ * @param key Name of the key to delete
+ */
 void Session::removeKey(const std::string &key)
 {
 	std::map<string,string>::iterator it;
@@ -172,6 +229,10 @@ void Session::removeKey(const std::string &key)
 		mCache.erase (it);
 }
 
+/**
+ * @brief TEMPORARY - This is a debug method used to test an authentication system
+ *
+ */
 void Session::auth(unsigned long id, string user)
 {
 	ostringstream convertId;
@@ -184,16 +245,30 @@ void Session::auth(unsigned long id, string user)
 	mCache["AuthUsername"] = user;
 }
 
+/**
+ * @brief Test if this is a new session
+ *
+ * @return boolean True if newly created (using create()), False in other case
+ */
 bool Session::isNew(void)
 {
 	return mIsNew;
 }
 
+/**
+ * @brief Test if the session is valid
+ *
+ * @return boolean True if the session is valid
+ */
 bool Session::isValid(void)
 {
 	return mValid;
 }
 
+/**
+ * @brief TEMPORARY - This is a debug method used to test an authentication system
+ *
+ */
 int Session::isAuth(void)
 {
 	for( map<string,string>::iterator ii=mCache.begin(); ii!=mCache.end(); ++ii)
