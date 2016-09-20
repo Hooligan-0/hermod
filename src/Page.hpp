@@ -29,6 +29,7 @@
 class Request;
 
 using namespace std;
+using namespace hermod;
 
 class Page
 {

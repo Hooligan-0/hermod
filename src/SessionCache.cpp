@@ -15,6 +15,8 @@
 #include "SessionCache.hpp"
 #include "Session.hpp"
 
+namespace hermod {
+
 SessionCache* SessionCache::mInstance = NULL;  
 
 /**
@@ -135,4 +137,6 @@ Session *SessionCache::getById(const std::string &id)
 	}
 	return sess;
 }
+
+} // namespace hermod
 /* EOF */

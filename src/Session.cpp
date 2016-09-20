@@ -23,8 +23,9 @@
 #include "Config.hpp"
 #include "Session.hpp"
 
-using namespace hermod;
 using namespace std;
+
+namespace hermod {
 
 /**
  * @brief Default constructor
@@ -280,4 +281,6 @@ int Session::isAuth(void)
 	}
 	return 0;
 }
+
+} // namespace hermod
 /* EOF */

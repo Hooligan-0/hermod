@@ -17,6 +17,8 @@
 #include <string>
 #include <vector>
 
+namespace hermod {
+
 class Session;
 
 /**
@@ -38,4 +40,5 @@ private:
 	std::vector<Session *> mCache;
 };
 
+} // namespace hermod
 #endif

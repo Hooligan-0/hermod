@@ -19,6 +19,8 @@
 
 using namespace std;
 
+namespace hermod {
+
 /**
  * @class Session
  * @brief This class manage one user session
@@ -55,4 +57,5 @@ private:
 	string mFilename;
 	std::map <string, string> mCache;
 };
+} // namespace hermod
 #endif

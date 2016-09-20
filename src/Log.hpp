@@ -21,6 +21,8 @@
 #include <netinet/in.h>
 #include "Session.hpp"
 
+using namespace hermod;
+
 /**
  * @class LogCtrl
  * @brief This class allow to create control-messages for log (ex: endl)
