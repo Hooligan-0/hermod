@@ -29,10 +29,17 @@
 class Request;
 
 using namespace std;
-using namespace hermod;
 
 namespace hermod {
 
+/**
+ * @class Page
+ * @brief This class define a generic Page skeleton
+ *
+ * When a request is received and match a route, a Page is allocated to process
+ * the request and generate some datas as response. This class must be used as
+ * parent class for module-specific pages.
+ */
 class Page
 {
 public:
@@ -47,15 +54,20 @@ public:
 	std::string getUri(void);
 	
 	bool   useSession(void);
+	void   useSession(bool use);
 public:	
 	virtual string getArg(int n);
 	virtual int getArgCount(void);
 	virtual int process() = 0;
 protected:
-	bool      mUseSession;
+	Session  *session (void);
+	Request  *request (void);
+	Response *response(void);
+private:
 	Request  *mRequest;
 	Response *mResponse;
 	Session  *mSession;
+	bool      mUseSession;
 };
 
 } // namespace hermod

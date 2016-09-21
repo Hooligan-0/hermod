@@ -19,6 +19,8 @@
 #include "PageHello.hpp"
 #include "PageHelloJson.hpp"
 
+using namespace hermod;
+
 extern "C" Module* create_object()
 {
 	hermod::Dummy::ModDummy *module;

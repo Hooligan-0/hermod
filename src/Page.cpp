@@ -21,8 +21,12 @@
 #include "Session.hpp"
 #include "SessionCache.hpp"
 
-using namespace hermod;
+namespace hermod {
 
+/**
+ * @brief Default constructor
+ *
+ */
 Page::Page(void)
 {
 	mRequest  = NULL;
@@ -119,6 +123,10 @@ ContentJson *Page::initContentJson(void)
 	return content;
 }
 
+/**
+ * @brief Start the session layer for the current request
+ *
+ */
 void Page::initSession(void)
 {
 	// Test if this page require session
@@ -188,18 +196,76 @@ void Page::initSession(void)
 	}
 }
 
+/**
+ * @brief Get access to the request
+ *
+ * @return Request* Pointer to the Request
+ */
+Request *Page::request(void)
+{
+	if (mRequest == 0)
+		throw -1;
+
+	return mRequest;
+}
+
+/**
+ * @brief Get access to the session
+ *
+ * When sessions are used by a page, this method should be used by inherited
+ * page classes to access it. If the Session is not already loaded this method
+ * call initSession to load it ! Errors of initSession are not catch, so this
+ * method can fail with an exception.
+ *
+ * @return Session* Pointer to the session
+ */
+Session *Page::session(void)
+{
+	if (mSession == 0)
+		initSession();
+
+	return mSession;
+}
+
+/**
+ * @brief Set the request associated with this page
+ *
+ * @param obj Pointer to the source request
+ */
 void Page::setRequest(Request *obj)
 {
 	mRequest = obj;
 }
 
+/**
+ * @brief Set the response object that will contains the page result
+ *
+ * @param obj Pointer to a response object
+ */
 void Page::setReponse(Response *obj)
 {
 	mResponse = obj;
 }
 
+/**
+ * @brief Test the session flag to check if this page must use a session
+ *
+ * @return boolean True if a Session if needed by this page
+ */
 bool Page::useSession(void)
 {
 	return mUseSession;
 }
+
+/**
+ * @brief Set the session flag to define if this page need a session
+ *
+ * @param use Boolean value, true if a Seesion is needed
+ */
+void Page::useSession(bool use)
+{
+	mUseSession = use;
+}
+
+} // namespace hermod
 /* EOF */

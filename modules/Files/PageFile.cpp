@@ -61,7 +61,7 @@ void PageFile::directoryListing(File &dirFile)
 {
 	Directory reqDir(dirFile);
 
-	mResponse->header()->setContentType("text/html");
+	response()->header()->setContentType("text/html");
 	cout << "<html>";
 	cout <<   "<head><title>Directory listing</title></head>";
 	cout <<   "<body>";
@@ -96,7 +96,7 @@ void PageFile::fileDisplay(File &file)
 	// Close file
 	dataFile.close();
 	
-	mResponse->header()->setContentType("text/plain");
+	response()->header()->setContentType("text/plain");
 
 	std::string strData(data.begin(), data.end());
 	cout << strData;

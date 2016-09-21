@@ -18,6 +18,8 @@
 #include "modFiles.hpp"
 #include "PageFile.hpp"
 
+using namespace hermod;
+
 extern "C" Module* create_object()
 {
 	hermod::Files::ModFiles *module;
