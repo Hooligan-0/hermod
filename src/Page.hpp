@@ -31,6 +31,8 @@ class Request;
 using namespace std;
 using namespace hermod;
 
+namespace hermod {
+
 class Page
 {
 public:
@@ -55,4 +57,6 @@ protected:
 	Response *mResponse;
 	Session  *mSession;
 };
+
+} // namespace hermod
 #endif

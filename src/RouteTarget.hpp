@@ -18,11 +18,10 @@
 #include <string>
 #include <vector>
 
-class Page;
-
 namespace hermod {
 
 class Module;
+class Page;
 
 class RouteTarget
 {

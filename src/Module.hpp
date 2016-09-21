@@ -17,12 +17,11 @@
 
 #include <string>
 
-class Page;
-
 using namespace std;
 
 namespace hermod {
 
+class Page;
 class Router;
 class ModuleCache;
 
