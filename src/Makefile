@@ -13,7 +13,7 @@
  # Authors: Saint-Genest Gwenael <gwen@hooligan0.net>
  #
 TARGET = hermod
-SRC  = main.cpp App.cpp Config.cpp ConfigKey.cpp Log.cpp Request.cpp
+SRC  = main.cpp App.cpp Config.cpp ConfigKey.cpp Log.cpp Request.cpp String.cpp
 SRC += Module.cpp ModuleCache.cpp
 SRC += Router.cpp RouteTarget.cpp
 SRC += Page.cpp Session.cpp SessionCache.cpp
