@@ -33,8 +33,9 @@ public:
 	String(const std::string &src);
 	~String();
 	void   clear (void);
+	char  *data (void) const;
 	size_t length(void) const;
-	const char *ptr (void) const;
+	void   reserve(unsigned int size);
 	size_t size(void) const;
 	int    toInt(void) const;
 private:
@@ -45,9 +46,10 @@ public:
 	String & operator=(String & src);
 	String & operator=(const char *src);
 	String & operator=(const std::string &src);
-	operator char*() {return mBuffer; }
+	operator char*() { return mBuffer; }
 	operator std::string() { return std::string(mBuffer); }
 public:
+	friend bool          operator==(const String&, const char *);
 	friend std::ostream& operator<<(std::ostream&, const String &);
 	friend bool          operator< (String const &a, String const &b);
 private:

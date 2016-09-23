@@ -111,17 +111,22 @@ FCGX_Request *Request::getFCGX(void)
 	return mFcgiRequest;
 }
 
+/**
+ * @brief Get the HTTP method of this request
+ *
+ * @return Method The requested method
+ */
 Request::Method Request::getMethod(void)
 {
 	if (mMethod != Undef)
 		return mMethod;
 
-	std::string method = getParam("REQUEST_METHOD");
-	if ( method.compare("OPTIONS") == 0 )
+	String method = getParam("REQUEST_METHOD");
+	if (method == "OPTIONS")
 		mMethod = Option;
-	else if ( method.compare("GET") == 0 )
+	else if (method == "GET")
 		mMethod = Get;
-	else if ( method.compare("POST") == 0 )
+	else if (method == "POST")
 		mMethod = Post;
 
 	return mMethod;
@@ -135,13 +140,25 @@ Request::Method Request::getMethod(void)
  */
 String Request::getParam (const String &name)
 {
-	String value;
-	
-	const char *p = FCGX_GetParam(name.ptr(), mFcgiRequest->envp);
-	if (p)
-		value = p;
-	
+	String value = FCGX_GetParam(name.data(), mFcgiRequest->envp);
+
 	return value;
+}
+
+/**
+ * @brief Get the value of a posted variable
+ *
+ * @param name Name of the variable
+ * @return String Value of the variable
+ */
+String Request::getFormValue(const String &name)
+{
+	// If the list of received variables is empty, refresh it
+	if (mFormParameters.empty())
+		loadFormInputs();
+
+	// Get the value from cache, and return it
+	return mFormParameters[ name ];
 }
 
 std::string Request::getUri(unsigned int n = 0)
@@ -154,6 +171,62 @@ std::string Request::getUri(unsigned int n = 0)
 	}
 	
 	return uri;
+}
+
+/**
+ * @brief Read the posted content and insert variables into form cache
+ *
+ */
+void Request::loadFormInputs(void)
+{
+	Method method = getMethod();
+	
+	if (method == Post)
+	{
+		String contentLength = getParam("CONTENT_LENGTH");
+		// Convert content length to a numeric value
+		int len = contentLength.toInt();
+		if (len == 0)
+			return;
+		// Arbitraty upper limit ... must be improved in future
+		if (len > (1024 * 1024))
+			return;
+		// Get datas
+		String buffer;
+		buffer.reserve(len);
+		FCGX_GetStr(buffer, len, mFcgiRequest->in);
+		char *pnt = buffer;
+		char *token = buffer;
+		String paramName;
+		String paramValue;
+		while(1)
+		{
+			if ((*pnt == 0) || (*pnt == '&'))
+			{
+				bool isLast = (*pnt == 0);
+				*pnt = 0;
+				paramValue = token;
+				mFormParameters[ paramName ] = paramValue;
+				if (isLast)
+					break;
+				*pnt = '&';
+				token = (pnt + 1);
+			}
+			else if (*pnt == '=')
+			{
+				*pnt = 0;
+				paramName = token;
+				token = (pnt + 1);
+				*pnt = '=';
+			}
+			else if (*pnt == '&')
+			{
+				paramName.clear();
+				token = (pnt + 1);
+			}
+			pnt ++;
+		}
+	}
 }
 
 void Request::setModules(ModuleCache *cache)

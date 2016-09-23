@@ -35,12 +35,16 @@ public:
 	Request::Method  getMethod(void);
 	String           getParam (const String &name);
 	std::string getUri(unsigned int n);
+	String      getFormValue (const String &name);
 	std::string getCookieByName(const std::string &name, bool allowEmpty);
 	void        setUri(const std::string &route);
+protected:
+	void        loadFormInputs(void);
 private:
 	FCGX_Request  *mFcgiRequest;
 	Method         mMethod;
 	ModuleCache   *mModuleCache;
 	std::vector<std::string> mUri;
+	std::map <String, String> mFormParameters;
 };
 #endif

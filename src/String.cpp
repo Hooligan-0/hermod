@@ -53,7 +53,10 @@ String::String(const char *src)
 	mBuffer = 0;
 	mLength = 0;
 	mSize   = 0;
-	
+
+	if (src == 0)
+		return;
+
 	// Compute string length
 	size_t len = 0;
 	char *p = (char *)src;
@@ -140,7 +143,17 @@ void String::copy(char *src, int len)
  */
 void String::copy(String const &src)
 {
-	copy((char *)src.ptr(), src.size());
+	copy((char *)src.data(), src.size());
+}
+
+/**
+ * @brief Get a direct access to internal data buffer
+ *
+ * @return char* Pointer to the internal data buffer
+ */
+char *String::data(void) const
+{
+	return (char *)mBuffer;
 }
 
 /**
@@ -182,13 +195,16 @@ void String::realloc(size_t len)
 }
 
 /**
- * @brief Get a direct access to internal data buffer
+ * @brief Force the allocation of a specified content size
  *
- * @return char* Pointer to the internal data buffer
+ * @param size The size (in bytes) of the content
  */
-const char *String::ptr(void) const
+void String::reserve(unsigned int size)
 {
-	return (const char *)mBuffer;
+	clear();
+	realloc(size + 1);
+	mBuffer[size] = 0;
+	mLength = size;
 }
 
 /**
@@ -201,6 +217,11 @@ size_t String::size(void) const
 	return mSize;
 }
 
+/**
+ * @brief Convert the numeric string (base 10) to an integer
+ *
+ * @return integer Numerical value of the string
+ */
 int String::toInt(void) const
 {
 	int result = 0;
@@ -226,7 +247,7 @@ int String::toInt(void) const
  */
 String & String::operator=(String & src)
 {
-	copy((char *)src.ptr(), src.size());
+	copy((char *)src.data(), src.size());
 	
 	return *this;
 }
@@ -239,6 +260,14 @@ String & String::operator=(String & src)
  */
 String & String::operator=(const char *src)
 {
+	// If the source string is a null-pointer
+	if (src == 0)
+	{
+		// Nothing to copy, clear current content and return
+		clear();
+		return *this;
+	}
+	
 	// Compute string length
 	char *p = (char *)src;
 	while(*p)
@@ -267,6 +296,32 @@ String & String::operator=(const std::string &src)
 // ------------------------- Friend operators -------------------------
 
 /**
+ * @brief Test if the content of a string and a c-string are equal
+ *
+ * @param src Reference to a string object (left member of "==")
+ * @param str Pointer to the c-string to compare
+ * @return boolean True if the two strings are equal
+ */
+bool operator==(String const& src, const char *str)
+{
+	char *p = src.data();
+
+	for (unsigned int i = 0; i < src.length(); ++i)
+	{
+		if (*str == 0)
+			return false;
+		if (*str != *str)
+			return false;
+		p++;
+		str++;
+	}
+	if (*str != 0)
+		return false;
+
+	return true;
+}
+
+/**
  * @brief Compare alphabetical values of two strings
  *
  * @param a Reference to the first tested string
@@ -275,8 +330,8 @@ String & String::operator=(const std::string &src)
  */
 bool operator<(String const& a, String const& b)
 {
-	const char *aStr = a.ptr();
-	const char *bStr = b.ptr();
+	const char *aStr = a.data();
+	const char *bStr = b.data();
 
 	while ((*aStr != 0) && (*bStr != 0))
 	{
