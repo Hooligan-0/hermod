@@ -18,6 +18,7 @@
 #include <fcgio.h>
 #include "ModuleCache.hpp"
 #include "Page.hpp"
+#include "String.hpp"
 
 using namespace  hermod;
 
@@ -32,12 +33,13 @@ public:
 	unsigned int     countUriArgs(void);
 	FCGX_Request    *getFCGX  (void);
 	Request::Method  getMethod(void);
-	std::string      getParam (const std::string &name);
+	String           getParam (const String &name);
 	std::string getUri(unsigned int n);
 	std::string getCookieByName(const std::string &name, bool allowEmpty);
 	void        setUri(const std::string &route);
 private:
 	FCGX_Request  *mFcgiRequest;
+	Method         mMethod;
 	ModuleCache   *mModuleCache;
 	std::vector<std::string> mUri;
 };

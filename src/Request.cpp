@@ -15,13 +15,19 @@
 #include <stdexcept>
 #include "Request.hpp"
 #include "Log.hpp"
+#include "String.hpp"
 
 using namespace std;
 
+/**
+ * @brief Default constructor
+ *
+ */
 Request::Request(FCGX_Request *req)
 {
 	mFcgiRequest = req;
 	mModuleCache = 0;
+	mMethod      = Undef;
 
 	const char *u = FCGX_GetParam("QUERY_STRING", req->envp);
 	if (u)
@@ -31,11 +37,20 @@ Request::Request(FCGX_Request *req)
 	}
 }
 
+/**
+ * @brief Default destructor
+ *
+ */
 Request::~Request()
 {
 	// Nothing to do
 }
 
+/**
+ * @brief Get the number of arguments into requested URI
+ *
+ * @return integer Number of known arguments
+ */
 unsigned int Request::countUriArgs(void)
 {
 	if (mUri.empty())
@@ -98,22 +113,31 @@ FCGX_Request *Request::getFCGX(void)
 
 Request::Method Request::getMethod(void)
 {
+	if (mMethod != Undef)
+		return mMethod;
+
 	std::string method = getParam("REQUEST_METHOD");
 	if ( method.compare("OPTIONS") == 0 )
-		return Option;
+		mMethod = Option;
 	else if ( method.compare("GET") == 0 )
-		return Get;
+		mMethod = Get;
 	else if ( method.compare("POST") == 0 )
-		return Post;
-	else
-		return Undef;
+		mMethod = Post;
+
+	return mMethod;
 }
 
-std::string Request::getParam (const std::string &name)
+/**
+ * @brief Read the value of an environment variable
+ *
+ * @param name Name of the environment variable
+ * @return String Value for this variable
+ */
+String Request::getParam (const String &name)
 {
-	std::string value;
+	String value;
 	
-	const char *p = FCGX_GetParam(name.c_str(), mFcgiRequest->envp);
+	const char *p = FCGX_GetParam(name.ptr(), mFcgiRequest->envp);
 	if (p)
 		value = p;
 	
