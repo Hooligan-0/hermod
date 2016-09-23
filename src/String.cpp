@@ -14,6 +14,7 @@
  */
 #include <cstdlib>
 #include "String.hpp"
+#include <iostream>
 
 namespace hermod {
 
@@ -45,7 +46,7 @@ String::String(const String &src)
 /**
  * @brief Constructor with copy from a null terminated c-string
  *
- * @param str Source c-string to copy
+ * @param src Source c-string to copy
  */
 String::String(const char *src)
 {
@@ -59,15 +60,22 @@ String::String(const char *src)
 	while(*p)
 		p++;
 	len = (p - src);
-	// Allocate memory to hold source string
-	realloc(len + 1);
+	// Copy the string
+	copy((char *)src, len);
+}
 
-	// Copy source string
-	p = mBuffer;
-	for (unsigned int i = 0; i < len; i++)
-		*p++ = *src++;
-	*p = 0; // Add a byte to finish string
-	mLength = len;
+/**
+ * @brief Constructor with copy from an std::string
+ *
+ * @param src Source std::string to copy
+ */
+String::String(const std::string &src)
+{
+	mBuffer = 0;
+	mLength = 0;
+	mSize   = 0;
+	// Copy the content of the std:string
+	copy((char *)src.c_str(), src.size());
 }
 
 /**
@@ -98,31 +106,41 @@ void String::clear(void)
 /**
  * @brief Copy content of another string into this one
  *
- * @param src Reference to a source string
+ * @param src Pointer to the source c-string
+ * @param len Length of the string to copy
  */
-void String::copy(String const &src)
+void String::copy(char *src, int len)
 {
-	int len = src.size();
-	
 	if (len == 0)
 	{
 		clear();
 		return;
 	}
-	
+
 	// Allocate memory
 	realloc(len + 1);
-	
-	char *pSrc = (char *)src.ptr();
-	char *pDst = mBuffer;
-	
+
+	char *pDest = mBuffer;
+
 	// Copy buffer
 	for (int i = 0; i < len; i++)
-		*pDst++ = *pSrc++;
+		*pDest++ = *src++;
+
 	// Add a NULL byte to finish the string
-	*pDst = 0;
+	*pDest = 0;
+
 	// Update current length;
 	mLength = len;
+}
+
+/**
+ * @brief Copy content of another string into this one
+ *
+ * @param src Reference to a source string
+ */
+void String::copy(String const &src)
+{
+	copy((char *)src.ptr(), src.size());
 }
 
 /**
@@ -183,6 +201,23 @@ size_t String::size(void) const
 	return mSize;
 }
 
+int String::toInt(void) const
+{
+	int result = 0;
+
+	char *c = mBuffer;
+
+	for (unsigned int i = 0; i < mLength; i++)
+	{
+		if ( (*c < '0') || (*c > '9') )
+			break;
+		result = (result * 10);
+		result += (*c - '0');
+		c++;
+	}
+	return result;
+}
+
 /**
  * @brief Assign a new value to the string, based on another string
  *
@@ -191,27 +226,7 @@ size_t String::size(void) const
  */
 String & String::operator=(String & src)
 {
-	int   len  = src.size();
-	
-	if (len == 0)
-	{
-		clear();
-		return *this;
-	}
-	
-	// Allocate memory
-	realloc(len + 1);
-	
-	char *pSrc = (char *)src.ptr();
-	char *pDst = mBuffer;
-	
-	// Copy buffer
-	for (int i = 0; i < len; i++)
-		*pDst++ = *pSrc++;
-	// Add a NULL byte to finish the string
-	*pDst = 0;
-	// Update current length;
-	mLength = len;
+	copy((char *)src.ptr(), src.size());
 	
 	return *this;
 }
@@ -222,26 +237,30 @@ String & String::operator=(String & src)
  * @param src Pointer to a null-terminated c-string
  * @return String& Reference to the string hitself
  */
-String & String::operator=(char *src)
+String & String::operator=(const char *src)
 {
-	int srcLength = 0;
-
 	// Compute string length
-	char *p = src;
+	char *p = (char *)src;
 	while(*p)
 		p++;
-	srcLength = (p - src);
+	int srcLength = (p - src);
 
-	// Allocate memory
-	realloc(srcLength + 1);
+	copy((char *)src, srcLength);
 
-	// Copy source string
-	p = mBuffer;
-	for (int i = 0; i < srcLength; i++)
-		*p++ = *src++;
-	*p = 0; // Add a byte to finish string
-	mLength = srcLength;
+	return *this;
+}
 
+/**
+ * @brief Assign a new value to the string, based on an std::string
+ *
+ * @param src Reference to a std::string object
+ * @return String& Reference to the string hitself
+ */
+String & String::operator=(const std::string &src)
+{
+	// Copy the content of the std:string
+	copy((char *)src.c_str(), src.size());
+	
 	return *this;
 }
 

@@ -28,19 +28,25 @@ class String
 {
 public:
 	String();
-	explicit String(const String &src);
-	explicit String(const char *src);
+	String(const String &src);
+	String(const char *src);
+	String(const std::string &src);
 	~String();
 	void   clear (void);
 	size_t length(void) const;
 	const char *ptr (void) const;
 	size_t size(void) const;
+	int    toInt(void) const;
 private:
+	void   copy(char *src, int len);
 	void   copy(const String &src);
 	void   realloc(size_t len);
 public:
 	String & operator=(String & src);
-	String & operator=(char *src);
+	String & operator=(const char *src);
+	String & operator=(const std::string &src);
+	operator char*() {return mBuffer; }
+	operator std::string() { return std::string(mBuffer); }
 public:
 	friend std::ostream& operator<<(std::ostream&, const String &);
 	friend bool          operator< (String const &a, String const &b);
