@@ -2,7 +2,6 @@ Package: hermod
 Version: 0.2-9c14765
 Section: httpd
 Priority: optional
-Architecture: any
 Source: hermod
 Maintainer: Hooligan0 <gwen@ecowlogic.io>
 Build-Depends: debhelper (>=9)

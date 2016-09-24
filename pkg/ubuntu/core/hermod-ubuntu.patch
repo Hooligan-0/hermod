@@ -1,0 +1,44 @@
+diff -urN src-orig/config.h src/config.h
+--- a/config.h	2016-09-26 11:41:53.599421000 +0000
++++ src/config.h	2016-09-26 11:44:00.279421000 +0000
+@@ -16,23 +16,23 @@
+ #define CONFIG_H
+ 
+ #ifndef INSTALL
+-#define INSTALL "/usr/local"
++#define INSTALL "/usr"
+ #endif
+ 
+ #ifndef DEF_CFG_FILE
+-#define DEF_CFG_FILE INSTALL "/etc/hermod/main.cfg"
++#define DEF_CFG_FILE "/etc/hermod/main.cfg"
+ #endif
+ 
+ #ifndef DEF_DIR_ROOT
+-#define DEF_DIR_ROOT  "/var/hermod/"
++#define DEF_DIR_ROOT "/var/hermod/"
+ #endif
+ 
+ #ifndef DEF_DIR_SESS
+-#define DEF_DIR_SESS  "/tmp/"
++#define DEF_DIR_SESS "/tmp/"
+ #endif
+ 
+ #ifndef DEF_LOG_FILE
+-#define DEF_LOG_FILE  "/var/log/hermod.log"
++#define DEF_LOG_FILE "/var/log/hermod.log"
+ #endif
+ 
+ #ifndef DEF_DIR_PLUGINS
+diff -urN src-orig/Makefile src/Makefile
+--- a/Makefile	2016-09-26 11:41:53.599421000 +0000
++++ src/Makefile	2016-09-26 11:43:18.339421000 +0000
+@@ -24,7 +24,7 @@
+ SRC += ContentJson/JsonString.cpp
+ SRC += Response.cpp ResponseHeader.cpp
+ 
+-INSTALL="/usr/local"
++INSTALL="/usr"
+ 
+ CC = c++
+ CFLAGS   = -Wall -Wextra -Wuninitialized -Wunused-label -Wunused-value -Wunused-variable -Wno-unknown-pragmas
