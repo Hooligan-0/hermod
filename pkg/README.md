@@ -5,3 +5,4 @@ for some linux distributions.
 
 List of subdirectories :
 * ubuntu : scripts to build .deb package
+* fedora : scripts to build .rpm package for fedora
