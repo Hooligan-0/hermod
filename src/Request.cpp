@@ -19,6 +19,8 @@
 
 using namespace std;
 
+namespace hermod {
+
 /**
  * @brief Default constructor
  *
@@ -26,7 +28,6 @@ using namespace std;
 Request::Request(FCGX_Request *req)
 {
 	mFcgiRequest = req;
-	mModuleCache = 0;
 	mMethod      = Undef;
 
 	const char *u = FCGX_GetParam("QUERY_STRING", req->envp);
@@ -64,6 +65,13 @@ unsigned int Request::countUriArgs(void)
 	return count;
 }
 
+/**
+ * @brief Get the value of a cookie
+ *
+ * @param name Name of the requested cookie
+ * @param allowEmpty Boolean to aloow (or not) empty result
+ * @return string Value of the cookie
+ */
 std::string Request::getCookieByName(const std::string &name, bool allowEmpty = false)
 {
 	std::string value("");
@@ -106,6 +114,11 @@ std::string Request::getCookieByName(const std::string &name, bool allowEmpty = 
 	return value;
 }
 
+/**
+ * @brief Get the FastCGI request
+ *
+ * @return FCGX_Request* Pointer to the FastCGI request used as input
+ */
 FCGX_Request *Request::getFCGX(void)
 {
 	return mFcgiRequest;
@@ -161,14 +174,18 @@ String Request::getFormValue(const String &name)
 	return mFormParameters[ name ];
 }
 
+/**
+ * @brief Get page URI or optional argument
+ *
+ * @param n Position of the requested argument (0 for URI hitself)
+ * @return string Value of the argument, or the URI
+ */
 std::string Request::getUri(unsigned int n = 0)
 {
 	std::string uri;
 	
 	if (n < mUri.size())
-	{
 		uri = mUri.at(n);
-	}
 	
 	return uri;
 }
@@ -229,11 +246,11 @@ void Request::loadFormInputs(void)
 	}
 }
 
-void Request::setModules(ModuleCache *cache)
-{
-	mModuleCache = cache;
-}
-
+/**
+ * @brief Update the URI / arguments split position according to the route
+ *
+ * @param route Reference to the route URI
+ */
 void Request::setUri(const std::string &route)
 {
 	if (mUri.size() == 0)
@@ -256,9 +273,11 @@ void Request::setUri(const std::string &route)
 	for(std::string token; getline(qs, token, '/'); )
 		mUri.push_back(token);
 	
-	Log::info() << "setUri " << mUri.at(0);
-	Log::info() << "  route " << route;
-	Log::info() << "  args count  " << mUri.size();
-	Log::info() << "  args  " << args << Log::endl;
+	Log::debug() << "setUri " << mUri.at(0);
+	Log::debug() << "  route " << route;
+	Log::debug() << "  args count  " << mUri.size();
+	Log::debug() << "  args  " << args << Log::endl;
 }
+
+} // namespace hermod
 /* EOF */

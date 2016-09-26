@@ -22,7 +22,7 @@
  *
  * @param request Pointer to a Request associated with this response
  */
-Response::Response(Request *request)
+Response::Response(hermod::Request *request)
 {
 	mContent     = 0;
 	mCoutBackup  = NULL;
@@ -123,7 +123,7 @@ void Response::setContent(hermod::Content *content)
  *
  * @param request Pointer to the Request
  */
-void Response::setRequest(Request *request)
+void Response::setRequest(hermod::Request *request)
 {
 	mRequest = request;
 	FCGX_Request *fcgi = mRequest->getFCGX();

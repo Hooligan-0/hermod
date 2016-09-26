@@ -19,11 +19,10 @@
 #include "Config.hpp"
 #include "RouteTarget.hpp"
 
-class Request;
-
 namespace hermod {
 
 class Module;
+class Request;
 
 /**
  * @class Router

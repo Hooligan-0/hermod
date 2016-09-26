@@ -243,7 +243,6 @@ void App::processFcgi (void)
 	}
 	// Instanciate a new Request
 	req = new Request( &fcgiReq );
-	req->setModules( &mModuleCache );
 	// Instanciate a new Response
 	rsp = new Response( req );
 

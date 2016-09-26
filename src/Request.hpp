@@ -20,8 +20,16 @@
 #include "Page.hpp"
 #include "String.hpp"
 
-using namespace  hermod;
+namespace hermod {
 
+/**
+ * @class Request
+ * @brief The Request class handle received datas and environment of an incoming request
+ *
+ * When hermod receive an incoming connection from a client, datas are saved into a
+ * Request object. This object is then used to dispatch the request to a module and by
+ * the page to get uri, parameters, form datas ...
+ */
 class Request
 {
 public:
@@ -29,7 +37,6 @@ public:
 public:
 	explicit Request(FCGX_Request *req);
 	~Request();
-	void setModules(ModuleCache *cache);
 	unsigned int     countUriArgs(void);
 	FCGX_Request    *getFCGX  (void);
 	Request::Method  getMethod(void);
@@ -43,8 +50,9 @@ protected:
 private:
 	FCGX_Request  *mFcgiRequest;
 	Method         mMethod;
-	ModuleCache   *mModuleCache;
 	std::vector<std::string> mUri;
 	std::map <String, String> mFormParameters;
 };
+
+} // namespace hermod
 #endif
