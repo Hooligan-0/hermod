@@ -38,6 +38,7 @@ public:
 	void   reserve(unsigned int size);
 	size_t size(void) const;
 	int    toInt(void) const;
+	void   urlDecode(void);
 private:
 	void   copy(char *src, int len);
 	void   copy(const String &src);
@@ -47,7 +48,13 @@ public:
 	String & operator=(const char *src);
 	String & operator=(const std::string &src);
 	operator char*() { return mBuffer; }
-	operator std::string() { return std::string(mBuffer); }
+	operator std::string()
+	{
+		if (mBuffer)
+			return std::string(mBuffer);
+		else
+			return std::string("");
+	}
 public:
 	friend bool          operator==(const String&, const char *);
 	friend std::ostream& operator<<(std::ostream&, const String &);

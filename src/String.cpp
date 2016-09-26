@@ -240,6 +240,66 @@ int String::toInt(void) const
 }
 
 /**
+ * @brief Decode the current string that contains urlencoded data
+ *
+ * This method is used to convert a string from urlencoded format to binary data. There is
+ * no restriction for the target content, this allow non-ascii (binary) data to be
+ * produced by percent+hex values. The size of the output string can be equal or less than
+ * the source (length is updated) but the internal storage is never reduced.
+ */
+void String::urlDecode(void)
+{
+	char *cIn  = mBuffer;
+	char *cOut = mBuffer;
+
+	// Read the whole string, search special chars
+	for (unsigned int i = 0; i < mLength; i++)
+	{
+		// The plus char is used for spaces
+		if (*cIn == '+')
+		{
+			// Replace plus char by space
+			*cOut = ' ';
+		}
+		// The percent char is used for encoding data into hex
+		else if (*cIn == '%')
+		{
+			char newChar;
+			cIn++; i++;
+			// Convert the first hex char (uppper 4 bits)
+			if ((*cIn >= '0') && (*cIn <= '9'))
+				newChar = ((*cIn - '0') << 4);
+			else if ((*cIn >= 'A') && (*cIn <= 'F'))
+				newChar = ((*cIn - 'A' + 10) << 4);
+			else if ((*cIn >= 'a') && (*cIn <= 'f'))
+				newChar = ((*cIn - 'a' + 10) << 4);
+
+			cIn++; i++;
+			// Convert the second hex char (lower 4 bits)
+			if ((*cIn >= '0') && (*cIn <= '9'))
+				newChar |= (*cIn - '0');
+			else if ((*cIn >= 'A') && (*cIn <= 'F'))
+				newChar |= (*cIn - 'A' + 10);
+			else if ((*cIn >= 'a') && (*cIn <= 'f'))
+				newChar |= (*cIn - 'a' + 10);
+
+			// Update string
+			*cOut = newChar;
+		}
+		// Copy all other non-reserver characters
+		else
+		{
+			*cOut = *cIn;
+		}
+		cIn++;
+		cOut++;
+	}
+
+	*cOut = 0;
+	mLength = (cOut - mBuffer);
+}
+
+/**
  * @brief Assign a new value to the string, based on another string
  *
  * @param src Source string
