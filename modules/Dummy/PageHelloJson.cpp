@@ -45,7 +45,7 @@ int PageHelloJson::process(void)
 	if (getArgCount() == 0)
 		msg += "World";
 	else
-		msg += getArg(1);
+		msg += getArg(1).toStdStr();
 	msg += " !";
 	
 	contentJson::JsonObject *obj = new contentJson::JsonObject;

@@ -46,7 +46,7 @@ int PageHello::process(void)
 	if (getArgCount() == 0)
 		msg += "World";
 	else
-		msg += getArg(1);
+		msg += getArg(1).toStdStr();
 	msg += " !";
 	
 	// Create an HTML "h1" tag
