@@ -25,12 +25,11 @@
 #include "ContentJson.hpp"
 #include "Response.hpp"
 #include "Session.hpp"
-
-class Request;
-
-using namespace std;
+#include "String.hpp"
 
 namespace hermod {
+
+class Request;
 
 /**
  * @class Page
@@ -51,12 +50,11 @@ public:
 	hermod::Content     *initContent(void);
 	hermod::ContentHtml *initContentHtml(void);
 	hermod::ContentJson *initContentJson(void);
-	std::string getUri(void);
 	
 	bool   useSession(void);
 	void   useSession(bool use);
 public:	
-	virtual string getArg(int n);
+	virtual String getArg(int n);
 	virtual int getArgCount(void);
 	virtual int process() = 0;
 protected:

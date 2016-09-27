@@ -44,11 +44,11 @@ Page::Page(void)
  * wrapper to Request object, and can be overloaded by specific page.
  *
  * @param n Position of the requested element (0 for uri)
- * @return string Value of the requested element
+ * @return String Value of the requested element
  */
-string Page::getArg(int n)
+String Page::getArg(int n)
 {
-	return mRequest->getUri(n);
+	return String( mRequest->getUri(n) );
 }
 
 /**
@@ -207,6 +207,19 @@ Request *Page::request(void)
 		throw -1;
 
 	return mRequest;
+}
+
+/**
+ * @brief Get access to the Response object
+ *
+ * @return Response* Pointer to the Response object of this page
+ */
+Response *Page::response(void)
+{
+	if (mResponse == 0)
+		throw -1;
+
+	return mResponse;
 }
 
 /**
