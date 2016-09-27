@@ -147,7 +147,25 @@ void String::copy(String const &src)
 }
 
 /**
- * @brief Get a direct access to internal data buffer
+ * @brief Test if the length of the String is nul.
+ *
+ * @return boolean True if the data length is 0
+ */
+bool String::isEmpty(void) const
+{
+	if (mLength == 0)
+		return true;
+	return false;
+}
+
+/**
+ * @brief Get a pointer to internal data buffer
+ *
+ * This method allow to get a direct access to internal datas. The returned
+ * pointer can be used to read or write datas. This is usefull to implement
+ * externally some specific data convertion, or to use this String with standard
+ * C library functions. If the internal buffer is resized, this pointer may
+ * become invalid.
  *
  * @return char* Pointer to the internal data buffer
  */
@@ -207,6 +225,11 @@ void String::reserve(unsigned int size)
 	mLength = size;
 }
 
+void String::setLength(size_t len)
+{
+	mLength = len;
+}
+
 /**
  * @brief Get the size of the memory used for current content (in bytes)
  *
@@ -240,6 +263,18 @@ int String::toInt(void) const
 }
 
 /**
+ * @brief Convert the String to a C++ standard library string object
+ *
+ * @return std::string The returned std::string contains a copy of datas
+ */
+std::string String::toStdStr(void) const
+{
+	if (mBuffer)
+		return std::string(mBuffer);
+	return std::string("");
+}
+
+/**
  * @brief Decode the current string that contains urlencoded data
  *
  * This method is used to convert a string from urlencoded format to binary data. There is
@@ -249,6 +284,9 @@ int String::toInt(void) const
  */
 void String::urlDecode(void)
 {
+	if (mBuffer == 0)
+		return;
+
 	char *cIn  = mBuffer;
 	char *cOut = mBuffer;
 
@@ -264,7 +302,7 @@ void String::urlDecode(void)
 		// The percent char is used for encoding data into hex
 		else if (*cIn == '%')
 		{
-			char newChar;
+			char newChar = 0;
 			cIn++; i++;
 			// Convert the first hex char (uppper 4 bits)
 			if ((*cIn >= '0') && (*cIn <= '9'))
@@ -353,6 +391,28 @@ String & String::operator=(const std::string &src)
 	return *this;
 }
 
+// ------------------------------ Static Methods ------------------------------
+
+String String::number(unsigned long n)
+{
+	char tmp[11];
+
+	char *p = (tmp + 11);
+	*p = 0;
+
+	do
+	{
+		char digit = '0' + (n % 10);
+		*--p = digit;
+		n /= 10;
+	}
+	while (n != 0);
+
+	String result(p);
+
+	return result;
+}
+
 // ------------------------- Friend operators -------------------------
 
 /**
@@ -370,7 +430,7 @@ bool operator==(String const& src, const char *str)
 	{
 		if (*str == 0)
 			return false;
-		if (*str != *str)
+		if (*str != *p)
 			return false;
 		p++;
 		str++;

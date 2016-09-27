@@ -23,6 +23,9 @@ namespace hermod {
  * @class String
  * @brief This class handle text strings
  *
+ * This String class offer high level methods to create, convert and compare
+ * text strings. It is a replacement os the standard std::string that does not
+ * offer enough methods for hermod needs.
  */
 class String
 {
@@ -32,17 +35,22 @@ public:
 	String(const char *src);
 	String(const std::string &src);
 	~String();
-	void   clear (void);
-	char  *data (void) const;
-	size_t length(void) const;
-	void   reserve(unsigned int size);
-	size_t size(void) const;
-	int    toInt(void) const;
-	void   urlDecode(void);
+	void        clear    (void);
+	char       *data     (void) const;
+	bool        isEmpty  (void) const;
+	size_t      length   (void) const;
+	void        reserve  (unsigned int size);
+	size_t      size     (void) const;
+	std::string toStdStr (void) const;
+	int         toInt    (void) const;
+	void        urlDecode(void);
+public:
+	static String number(unsigned long);
 private:
 	void   copy(char *src, int len);
 	void   copy(const String &src);
 	void   realloc(size_t len);
+	void   setLength(size_t len);
 public:
 	String & operator=(String & src);
 	String & operator=(const char *src);
