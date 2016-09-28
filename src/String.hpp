@@ -35,6 +35,8 @@ public:
 	String(const char *src);
 	String(const std::string &src);
 	~String();
+	String     &append   (const String &src);
+	String     &append   (const char   *src);
 	void        clear    (void);
 	char       *data     (void) const;
 	bool        isEmpty  (void) const;
@@ -55,8 +57,14 @@ public:
 	String & operator=(String & src);
 	String & operator=(const char *src);
 	String & operator=(const std::string &src);
-	operator char*() { return mBuffer; }
-	operator std::string()
+	String & operator+ (const char *src);
+	String & operator+=(const String &src);
+	String & operator+=(const char   *src);
+	operator char*() const
+	{
+		return mBuffer;
+	}
+	operator std::string() const
 	{
 		if (mBuffer)
 			return std::string(mBuffer);
@@ -67,6 +75,7 @@ public:
 	friend bool          operator==(const String&, const char *);
 	friend std::ostream& operator<<(std::ostream&, const String &);
 	friend bool          operator< (String const &a, String const &b);
+	friend String        operator+ (String const &a, const char *b);
 private:
 	char  *mBuffer;
 	size_t mLength;

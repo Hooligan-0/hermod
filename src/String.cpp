@@ -14,7 +14,6 @@
  */
 #include <cstdlib>
 #include "String.hpp"
-#include <iostream>
 
 namespace hermod {
 
@@ -92,6 +91,120 @@ String::~String()
 }
 
 /**
+ * @brief Append a String at the end of the current one
+ *
+ * @param src Reference to the String to append
+ * @return String& Reference to the object hitself
+ */
+String & String::append(const String &src)
+{
+	char *s;
+	char *p;
+
+	// Compute the new total length
+	int len = (mLength + src.length());
+
+	// Allocate a buffer to hold the new string
+	char *newBuffer = (char *)malloc(len + 1);
+
+	// Copy the current string to the new buffer
+	if (mBuffer != 0)
+	{
+		p = newBuffer;
+		s = mBuffer;
+		for (unsigned int i = 0; i < mLength; i++)
+		{
+			*p = *s;
+			s++;
+			p++;
+		}
+	}
+	else
+		p = newBuffer;
+
+	// Copy the additionnal part to the new buffer
+	s = (char *)src.data();
+	for (unsigned int i = 0; i < src.length(); i++)
+	{
+		*p = *s;
+		s++;
+		p++;
+	}
+	*p = 0;
+
+	// If the string has already an internal buffer, free it
+	if (mBuffer)
+		free(mBuffer);
+	// Set the newly allocated buffer as internal buffer
+	mBuffer = newBuffer;
+	mSize = (len + 1);
+
+	mLength = len;
+
+	return *this;
+}
+
+/**
+ * @brief Append a c-string at the end of the current String
+ *
+ * @param src Pointer to the c-string to append
+ * @return String& Reference to the object hitself
+ */
+String & String::append(const char *src)
+{
+	char *s;
+
+	// Compute the length of the string to append
+	unsigned int srcLen = 0;
+	char *p = (char *)src;
+	while(*p)
+		p++;
+	srcLen = (p - src);
+
+	// Compute the new total length
+	int len = (mLength + srcLen);
+
+	// Allocate a buffer to hold the new string
+	char *newBuffer = (char *)malloc(len + 1);
+
+	// Copy the current string to the new buffer
+	if (mBuffer != 0)
+	{
+		p = newBuffer;
+		s = mBuffer;
+		for (unsigned int i = 0; i < mLength; i++)
+		{
+			*p = *s;
+			s++;
+			p++;
+		}
+	}
+	else
+		p = newBuffer;
+
+	// Copy the additionnal part to the new buffer
+	s = (char *)src;
+	for (unsigned int i = 0; i < srcLen; i++)
+	{
+		*p = *s;
+		s++;
+		p++;
+	}
+	*p = 0;
+
+	// If the string has already an internal buffer, free it
+	if (mBuffer)
+		free(mBuffer);
+	// Set the newly allocated buffer as internal buffer
+	mBuffer = newBuffer;
+	mSize = (len + 1);
+
+	mLength = len;
+
+	return *this;
+}
+
+/**
  * @brief Delete the current content of the string
  *
  */
@@ -143,7 +256,7 @@ void String::copy(char *src, int len)
  */
 void String::copy(String const &src)
 {
-	copy((char *)src.data(), src.size());
+	copy((char *)src.data(), src.length());
 }
 
 /**
@@ -391,6 +504,42 @@ String & String::operator=(const std::string &src)
 	return *this;
 }
 
+/**
+ * @brief Overload the "+" operator to append a c-string to the current object
+ *
+ * @param src Pointer to a c-string to append (the right member of the "+")
+ * @return String& A reference to the String object hitself
+ */
+String & String::operator+(const char *src)
+{
+	append(src);
+	return *this;
+}
+
+/**
+ * @brief Overload the "+=" operator to append another String to the current object
+ *
+ * @param src Reference to a String to append (the right member of the "+")
+ * @return String& A reference to the String object hitself
+ */
+String & String::operator+=(const String &src)
+{
+	append(src);
+	return *this;
+}
+
+/**
+ * @brief Overload the "+=" operator to append a c-string to the current object
+ *
+ * @param src Pointer to a c-string to append (the right member of the "+=")
+ * @return String& A reference to the String object hitself
+ */
+String & String::operator+=(const char *src)
+{
+	append(src);
+	return *this;
+}
+
 // ------------------------------ Static Methods ------------------------------
 
 String String::number(unsigned long n)
@@ -414,6 +563,22 @@ String String::number(unsigned long n)
 }
 
 // ------------------------- Friend operators -------------------------
+
+/**
+ * @brief Overload the "+" operator to append a c-string to a String
+ *
+ * @param a Reference to a String (the left member of "+")
+ * @param b Pointer to a c-string to append (the right member of the "+")
+ * @return String A new String that contains the two input strings
+ */
+String operator+(const String &a, const char *b)
+{
+	String result(a);
+
+	result.append(b);
+
+	return result;
+}
 
 /**
  * @brief Test if the content of a string and a c-string are equal
