@@ -47,9 +47,9 @@ public:
 	void   setReponse(Response  *obj);
 	void   initSession(void);
 	
-	hermod::Content     *initContent(void);
-	hermod::ContentHtml *initContentHtml(void);
-	hermod::ContentJson *initContentJson(void);
+	Content     *initContent(void);
+	ContentHtml *initContentHtml(void);
+	ContentJson *initContentJson(void);
 	
 	bool   useSession(void);
 	void   useSession(bool use);

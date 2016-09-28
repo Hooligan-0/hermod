@@ -21,27 +21,31 @@
 #include "Content.hpp"
 
 namespace hermod {
-	class Request;
-}
+
+class Request;
 
 /**
- * Class used to build and send CGI responses
+ * @class Response
+ * @brief Class used to build and send CGI responses
+ *
  */
 class Response {
 public:
-	explicit Response(hermod::Request *request = NULL);
+	explicit Response(Request *request = NULL);
 	~Response();
 	ResponseHeader *header();
 	void catchCout  (void);
 	void releaseCout(void);
 	void send(void);
-	void setContent(hermod::Content *content);
-	void setRequest(hermod::Request *request);
+	void setContent(Content *content);
+	void setRequest(Request *request);
 private:
-	hermod::Request  *mRequest;
+	Request          *mRequest;
 	ResponseHeader    mHeader;
-	hermod::Content  *mContent;
+	Content          *mContent;
 	std::streambuf   *mCoutBackup;
 	std::stringstream mCoutBuffer;
 };
+
+} // namespace hermod
 #endif

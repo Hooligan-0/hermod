@@ -17,12 +17,14 @@
 #include "Response.hpp"
 #include "Request.hpp"
 
+namespace hermod {
+
 /**
  * @brief Default constructor
  *
  * @param request Pointer to a Request associated with this response
  */
-Response::Response(hermod::Request *request)
+Response::Response(Request *request)
 {
 	mContent     = 0;
 	mCoutBackup  = NULL;
@@ -113,7 +115,7 @@ void Response::send(void)
  *
  * @param content Pointer to the Content
  */
-void Response::setContent(hermod::Content *content)
+void Response::setContent(Content *content)
 {
 	mContent = content;
 }
@@ -123,7 +125,7 @@ void Response::setContent(hermod::Content *content)
  *
  * @param request Pointer to the Request
  */
-void Response::setRequest(hermod::Request *request)
+void Response::setRequest(Request *request)
 {
 	mRequest = request;
 	FCGX_Request *fcgi = mRequest->getFCGX();
@@ -140,4 +142,6 @@ void Response::setRequest(hermod::Request *request)
 	// Allow credentials control
 	mHeader.addHeader("Access-Control-Allow-Credentials", "true");
 }
+
+} // namespace hermod
 /* EOF */
