@@ -456,7 +456,7 @@ void String::urlDecode(void)
  * @param src Source string
  * @return String& Reference to the string hitself
  */
-String & String::operator=(String & src)
+String & String::operator=(const String & src)
 {
 	copy((char *)src.data(), src.size());
 	

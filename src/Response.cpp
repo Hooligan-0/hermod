@@ -94,7 +94,7 @@ void Response::send(void)
 	FCGX_Request *fcgi = mRequest->getFCGX();
 	FCGX_Stream *fout = fcgi->out;
 	// Send Header
-	FCGX_PutS(mHeader.getHeader().c_str(), fout);
+	FCGX_PutS(mHeader.getHeader().data(), fout);
 	// Send Content
 	if (mContent)
 	{

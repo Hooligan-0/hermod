@@ -14,25 +14,32 @@
  */
 #ifndef RESPONSEHEADER_HPP
 #define RESPONSEHEADER_HPP
-
 #include <map>
+#include "String.hpp"
 
-using namespace std;
+namespace hermod {
 
+/**
+ * @class ResponseHeader
+ * @brief This class contains the header of a Response
+ *
+ */
 class ResponseHeader {
 public:
 	ResponseHeader();
-	void addHeader(string key, string value);
+	void addHeader(const String &key, String value);
 
-	void setContentType(string type);
-	void setRetCode(int code, string reason);
+	void setContentType(const String &type);
+	void setRetCode(int code, const String &reason);
 
-	string getHeader(void);
+	String getHeader(void);
 
 private:
 	int    mRetCode;
-	string mRetReason;
-	string mContentType;
-	std::map <string, string> mHeaders;
+	String mRetReason;
+	String mContentType;
+	std::map <String, String> mHeaders;
 };
+
+} // namespace hermod
 #endif

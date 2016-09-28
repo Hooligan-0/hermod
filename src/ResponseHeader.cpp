@@ -20,50 +20,76 @@
 
 using namespace std;
 
+namespace hermod {
+
+/**
+ * @brief Default constructor
+ *
+ */
 ResponseHeader::ResponseHeader()
     : mContentType("text/plain")
 {
 	mRetCode = 200;
-//	mContentType = "text/plain";
 }
 
-void ResponseHeader::addHeader(string key, string value)
+/**
+ * @brief Insert a new item into the header
+ *
+ * @param key Reference to the name of the parameter to add
+ * @param value The value for the parameter
+ */
+void ResponseHeader::addHeader(const String &key, String value)
 {
-	std::map<std::string, std::string>::iterator it;
+	std::map<String, String>::iterator it;
 	
-	it = mHeaders.find(key.c_str());
+	it = mHeaders.find(key.data());
 	if (it != mHeaders.end())
 		mHeaders.erase (it);
 	mHeaders[key] = value;
 }
 
-void ResponseHeader::setContentType(string type)
+/**
+ * @brief Set the HTTP content-type of the Response
+ *
+ * @param type Reference to a string that contains the mime-type
+ */
+void ResponseHeader::setContentType(const String &type)
 {
 	mContentType = type;
 }
 
-void ResponseHeader::setRetCode(int code, string reason)
+/**
+ * @brief Set the status code returned with the Response (default 200)
+ *
+ * @param code The status code to return with Response
+ * @param reason Reference to a String with status information
+ */
+void ResponseHeader::setRetCode(int code, const String &reason)
 {
 	mRetCode   = code;
 	mRetReason = reason;
 }
 
-string ResponseHeader::getHeader(void)
+/**
+ * @brief Get the full header
+ *
+ * @return String The full header text, with status and all parameters
+ */
+String ResponseHeader::getHeader(void)
 {
-	std::ostringstream oss;
-	std::string h;
+	String h;
 	
 	if (mRetCode != 200)
 	{
-		oss << mRetCode;
-		h += "Status: " + oss.str() + " ";
+		h.append("Status: ");
+		h += String::number(mRetCode) + " ";
 		h += mRetReason + "\n";
 	}
 	
 	if (mContentType != "")
 		h += "Content-type: " + mContentType + "\n";
 	
-	std::map<std::string, std::string>::iterator it;
+	std::map<String, String>::iterator it;
 	for (it = mHeaders.begin(); it != mHeaders.end(); ++it)
 	{
 		h += it->first +": " + it->second + "\n";
@@ -74,3 +100,6 @@ string ResponseHeader::getHeader(void)
 	
 	return h;
 }
+
+} // namespace hermod
+/* EOF */

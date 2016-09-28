@@ -54,7 +54,7 @@ private:
 	void   realloc(size_t len);
 	void   setLength(size_t len);
 public:
-	String & operator=(String & src);
+	String & operator=(const String & src);
 	String & operator=(const char *src);
 	String & operator=(const std::string &src);
 	String & operator+ (const char *src);
