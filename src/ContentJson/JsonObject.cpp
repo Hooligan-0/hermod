@@ -15,6 +15,7 @@
 #include <string>
 #include <sstream>
 #include "JsonObject.hpp"
+#include "JsonString.hpp"
 
 namespace hermod {
 	namespace contentJson {
@@ -47,12 +48,25 @@ JsonObject::~JsonObject()
  * @brief Insert a JSON element as child of this one
  *
  * @param name Name of this object member
- * @param element Pointer to the element to add into child list
+ * @param item Pointer to the element to add into child list
  */
 void JsonObject::add(const std::string &name, JsonElement *item)
 {
 	item->setName( name );
 	mChildren.push_back( item );
+}
+
+/**
+ * @brief Insert a string key/value as child of this json-object
+ *
+ * @param name Name of the new string member
+ * @param value Value of the string member
+ */
+void JsonObject::add(const std::string &name, const std::string &value)
+{
+	JsonString *newItem = new contentJson::JsonString(value);
+	newItem->setName( name );
+	mChildren.push_back( newItem );
 }
 
 /**

@@ -30,6 +30,7 @@ public:
 	JsonObject();
 	~JsonObject();
 	void add(const std::string &name, JsonElement *item);
+	void add(const std::string &name, const std::string &value);
 	void renderBody(void);
 	void renderHead(void);
 	void renderTail(void);
