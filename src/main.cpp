@@ -19,6 +19,7 @@
 #include <signal.h>
 #include <unistd.h>
 #include "App.hpp"
+#include "config.h"
 #include "Config.hpp"
 
 using namespace hermod;

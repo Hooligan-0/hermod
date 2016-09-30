@@ -18,7 +18,6 @@
 #include <string>
 #include <cstddef> // std::size_t
 #include <vector>
-#include "config.h"
 #include "ConfigKey.hpp"
 
 namespace hermod {
