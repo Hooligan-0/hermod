@@ -21,6 +21,8 @@
 #include <sstream>
 #include "Log.hpp"
 
+namespace hermod {
+
 Log *       Log::mInstance = NULL;
 LogCtrl     Log::endl(0);
 
@@ -331,3 +333,6 @@ LogStream& operator<<(LogStream &ls, void *ptr)
 	ls.append(oss.str());
 	return ls;
 }
+
+} // namespace hermod
+/* EOF */

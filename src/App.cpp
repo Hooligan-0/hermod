@@ -33,6 +33,8 @@ extern "C"
 void OS_LibShutdown(void);
 }
 
+namespace hermod {
+
 App*  App::mAppInstance = NULL;
 
 /**
@@ -332,4 +334,5 @@ void App::sigInt(void)
 	FCGX_ShutdownPending();
 }
 
+} // namespace hermod
 /* EOF */

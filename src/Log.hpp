@@ -21,7 +21,7 @@
 #include <netinet/in.h>
 #include "Session.hpp"
 
-using namespace hermod;
+namespace hermod {
 
 /**
  * @class LogCtrl
@@ -97,4 +97,6 @@ private:
 	LogStream    mWarning;
 	LogStream    mError;
 };
+
+} // namespace hermod
 #endif
