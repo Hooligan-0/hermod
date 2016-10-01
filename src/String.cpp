@@ -31,7 +31,7 @@ String::String()
 /**
  * @brief Constructor with copy from an existing String
  *
- * @param str Source string to copy
+ * @param src Source string to copy
  */
 String::String(const String &src)
 {
@@ -254,7 +254,7 @@ void String::copy(char *src, int len)
  *
  * @param src Reference to a source string
  */
-void String::copy(String const &src)
+void String::copy(const String &src)
 {
 	copy((char *)src.data(), src.length());
 }

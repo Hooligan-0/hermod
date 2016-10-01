@@ -25,7 +25,7 @@ namespace hermod {
  * @brief Class to handle a "generic" HTML tag
  *
  * Many HTML tags use the same format with a opening and a closing element. This
- * class can be used to create an arbitrary tag : <tag>(some datas)</tag>
+ * class can be used to create an arbitrary tag : < tag >(some datas)< /tag >
  */
 class HtmlTag : public HtmlElement {
 public:
