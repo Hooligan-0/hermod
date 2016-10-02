@@ -1,0 +1,11 @@
+Package: hermod-database
+Version: 0.2
+Section: httpd
+Priority: optional
+Source: hermod
+Maintainer: Hooligan0 <gwen@ecowlogic.io>
+Build-Depends: debhelper (>=9)
+Standards-Version: 3.9.6
+Homepage: https://github.com/Hooligan-0/hermod
+Depends: libstdc++6 (>= 5.4), libodb-2.4 (>=2.4.0), libodb-pgsql-2.4 (>=2.4.0)
+Description: An Hermod module to use ODBC

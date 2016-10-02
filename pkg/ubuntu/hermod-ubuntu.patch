@@ -1,0 +1,73 @@
+diff -urN ref/config.h src/config.h
+--- ref/config.h	2016-10-02 09:39:31.805973733 +0000
++++ src/config.h	2016-10-02 11:52:22.511015161 +0000
+@@ -16,23 +16,23 @@
+ #define CONFIG_H
+ 
+ #ifndef INSTALL
+-#define INSTALL "/usr/local"
++#define INSTALL "/usr"
+ #endif
+ 
+ #ifndef DEF_CFG_FILE
+-#define DEF_CFG_FILE INSTALL "/etc/hermod/main.cfg"
++#define DEF_CFG_FILE "/etc/hermod/main.cfg"
+ #endif
+ 
+ #ifndef DEF_DIR_ROOT
+-#define DEF_DIR_ROOT  "/var/hermod/"
++#define DEF_DIR_ROOT "/var/hermod/"
+ #endif
+ 
+ #ifndef DEF_DIR_SESS
+-#define DEF_DIR_SESS  "/tmp/"
++#define DEF_DIR_SESS "/tmp/"
+ #endif
+ 
+ #ifndef DEF_LOG_FILE
+-#define DEF_LOG_FILE  "/var/log/hermod.log"
++#define DEF_LOG_FILE "/var/log/hermod.log"
+ #endif
+ 
+ #ifndef DEF_DIR_PLUGINS
+diff -urN ref/Makefile src/Makefile
+--- ref/Makefile	2016-10-02 09:39:31.805973733 +0000
++++ src/Makefile	2016-10-02 10:00:37.135138493 +0000
+@@ -24,11 +24,11 @@
+ SRC += ContentJson/JsonString.cpp
+ SRC += Response.cpp ResponseHeader.cpp
+ 
+-INSTALL="/usr/local"
++INSTALL="/usr"
+ 
+ CC = c++
+ CFLAGS   = -Wall -Wextra -Wuninitialized -Wunused-label -Wunused-value -Wunused-variable -Wno-unknown-pragmas
+-CFLAGS  += -DINSTALL=\"$(INSTALL)\"
++CFLAGS  += -DINSTALL=\"$(INSTALL)\" -D_GLIBCXX_USE_CXX11_ABI=0
+ LDFLAGS  = -lfcgi -lfcgi++
+ LDFLAGS += -ldl -rdynamic
+ CHECK  = --enable=warning
+diff -urN ref/Database/Makefile modules/Database/Makefile
+--- ref/Database/Makefile	2016-10-02 09:39:31.801973749 +0000
++++ modules/Database/Makefile	2016-10-02 10:21:42.097545372 +0000
+@@ -18,7 +18,7 @@
+ CC = c++
+ CP = cp
+ RM = rm -f
+-CFLAGS   = -fPIC -I../../src
++CFLAGS   = -fPIC -I../../src -D_GLIBCXX_USE_CXX11_ABI=0
+ LIBS     = -lodb-pgsql -lodb
+ 
+ _COBJ =  $(SRC:.cpp=.o)
+diff -urN ref/Dummy/Makefile modules/Dummy/Makefile
+--- ref/Dummy/Makefile	2016-10-02 09:39:31.801973749 +0000
++++ modules/Dummy/Makefile	2016-10-02 10:20:33.809856922 +0000
+@@ -19,7 +19,7 @@
+ CP=cp
+ RM=rm -f
+ 
+-CFLAGS   = -fPIC -I../../src
++CFLAGS   = -fPIC -I../../src -D_GLIBCXX_USE_CXX11_ABI=0
+ 
+ _COBJ =  $(SRC:.cpp=.o)
+ COBJ = $(patsubst %, %,$(_COBJ))
