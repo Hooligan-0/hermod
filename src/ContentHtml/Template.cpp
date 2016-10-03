@@ -541,7 +541,7 @@ bool LoaderFile::load(const std::string &filename)
 	fullname += filename;
 	FILE *f = fopen(fullname.c_str(), "rb" );
 	if (f == 0)
-		return false;
+		throw std::runtime_error("Failed to load template");
 	std::size_t sep = filename.rfind('/');
 	if (sep == std::string::npos)
 		mFilename = filename;
