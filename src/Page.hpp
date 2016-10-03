@@ -23,13 +23,12 @@
 #include "Content.hpp"
 #include "ContentHtml.hpp"
 #include "ContentJson.hpp"
+#include "Request.hpp"
 #include "Response.hpp"
 #include "Session.hpp"
 #include "String.hpp"
 
 namespace hermod {
-
-class Request;
 
 /**
  * @class Page
