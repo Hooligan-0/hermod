@@ -77,7 +77,7 @@ String::String(const std::string &src)
 	mLength = 0;
 	mSize   = 0;
 	// Copy the content of the std:string
-	copy((char *)src.c_str(), src.size());
+	copy((char *)src.c_str(), src.length());
 }
 
 /**
@@ -458,7 +458,7 @@ void String::urlDecode(void)
  */
 String & String::operator=(const String & src)
 {
-	copy((char *)src.data(), src.size());
+	copy((char *)src.data(), src.length());
 	
 	return *this;
 }
@@ -499,7 +499,7 @@ String & String::operator=(const char *src)
 String & String::operator=(const std::string &src)
 {
 	// Copy the content of the std:string
-	copy((char *)src.c_str(), src.size());
+	copy((char *)src.c_str(), src.length());
 	
 	return *this;
 }
@@ -578,6 +578,33 @@ String operator+(const String &a, const char *b)
 	result.append(b);
 
 	return result;
+}
+
+/**
+ * @brief Test if the content of two strings are equal
+ *
+ * @param src Reference to a string object (left member of "==")
+ * @param str Reference to a string object (right member of "==")
+ * @return boolean True if the two strings are equal
+ */
+bool operator==(String const& src, const String &str)
+{
+	char *pSrc   = src.data();
+	char *pOther = str.data();
+
+	for (unsigned int i = 0; i < src.length(); ++i)
+	{
+		if (*pOther == 0)
+			return false;
+		if (*pOther != *pSrc)
+			return false;
+		pSrc++;
+		pOther++;
+	}
+	if (*pOther != 0)
+		return false;
+
+	return true;
 }
 
 /**

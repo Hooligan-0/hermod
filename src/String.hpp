@@ -72,6 +72,7 @@ public:
 			return std::string("");
 	}
 public:
+	friend bool          operator==(const String&, const String&);
 	friend bool          operator==(const String&, const char *);
 	friend std::ostream& operator<<(std::ostream&, const String &);
 	friend bool          operator< (String const &a, String const &b);
