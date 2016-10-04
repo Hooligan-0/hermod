@@ -20,6 +20,7 @@
 #include <sstream>
 #include <netinet/in.h>
 #include "Session.hpp"
+#include "String.hpp"
 
 namespace hermod {
 
@@ -44,12 +45,13 @@ class LogStream
 public:
 	LogStream();
 	explicit LogStream(int level);
-	void append  (const std::string &msg);
-	int  getLevel(void);
+	void append   (const std::string &msg);
+	int  getLevel (void) const;
 	void setBuffer(std::string *buffer);
-	void setLevel(int level);
+	void setLevel (int level);
 public:
 	friend LogStream& operator<<(LogStream &ls, const char msg[]);
+	friend LogStream& operator<<(LogStream &ls, const String &msg);
 	friend LogStream& operator<<(LogStream &ls, const std::string &msg);
 	friend LogStream& operator<<(LogStream &ls, int);
 	friend LogStream& operator<<(LogStream &ls, LogCtrl &ctrl);

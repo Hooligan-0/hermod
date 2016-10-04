@@ -157,6 +157,7 @@ LogStream &Log::warning(void)
 /**
  * @brief Set the file where logs must be written
  *
+ * @param filename Name of the file to use
  */
 void Log::setFile(const std::string &filename)
 {
@@ -217,38 +218,74 @@ void Log::writeToFile(const std::string &msg)
 
 // --------------------  -------------------- //
 
+/**
+ * @brief Default constructor
+ *
+ */
 LogStream::LogStream()
 {
 	mBuffer = 0;
 	mLevel  = 0;
 }
 
+/**
+ * @brief Constructor for a defined log level
+ *
+ * @param level The log level of this new stream
+ */
 LogStream::LogStream(int level)
 {
 	mBuffer = 0;
 	mLevel  = level;
 }
 
-void LogStream::append  (const std::string &msg)
+/**
+ * @brief Append a std::string to the log stream
+ *
+ * @param msg An std::string to append
+ */
+void LogStream::append(const std::string &msg)
 {
 	mLine.append(msg);
 }
 
-int  LogStream::getLevel(void)
+/**
+ * @brief Get the current level for this stream
+ *
+ * @return integer The current log level
+ */
+int LogStream::getLevel(void) const
 {
 	return(mLevel);
 }
 
+/**
+ * @brief Set the output buffer
+ *
+ * @param buffer Pointer to the output buffer to use
+ */
 void LogStream::setBuffer(std::string *buffer)
 {
 	mBuffer = buffer;
 }
 
+/**
+ * @brief Set a new log level for the stream
+ *
+ * @param level The new log level to set
+ */
 void LogStream::setLevel(int level)
 {
 	mLevel = level;
 }
 
+/**
+ * @brief Overload << operator to append a c-string
+ *
+ * @param ls  Reference to the current LogStream
+ * @param msg The c-string to append
+ * @return LogStream& Reference to the resulting LogStream (same as input)
+ */
 LogStream& operator<<(LogStream &ls, const char msg[])
 {
 	std::ostringstream oss;
@@ -257,6 +294,28 @@ LogStream& operator<<(LogStream &ls, const char msg[])
 	return ls;
 }
 
+/**
+ * @brief Overload << operator to append a String
+ *
+ * @param ls  Reference to the current LogStream
+ * @param msg The String to append
+ * @return LogStream& Reference to the resulting LogStream (same as input)
+ */
+LogStream& operator<<(LogStream &ls, const String &msg)
+{
+	std::ostringstream oss;
+	oss << msg.data();
+	ls.append( oss.str() );
+	return ls;
+}
+
+/**
+ * @brief Overload << operator to append a std::string
+ *
+ * @param ls  Reference to the current LogStream
+ * @param msg The std::string to append
+ * @return LogStream& Reference to the resulting LogStream (same as input)
+ */
 LogStream& operator<<(LogStream &ls, const std::string &msg)
 {
 	std::ostringstream oss;
@@ -265,6 +324,13 @@ LogStream& operator<<(LogStream &ls, const std::string &msg)
 	return ls;
 }
 
+/**
+ * @brief Overload << operator to append an integer value (as text)
+ *
+ * @param ls  Reference to the current LogStream
+ * @param msg The integer value to append
+ * @return LogStream& Reference to the resulting LogStream (same as input)
+ */
 LogStream& operator<<(LogStream &ls, int i)
 {
 	std::ostringstream oss;
@@ -273,18 +339,26 @@ LogStream& operator<<(LogStream &ls, int i)
 	return ls;
 }
 
+/**
+ * @brief Overload << operator to call a LogCtrl command
+ *
+ * @param ls  Reference to the current LogStream
+ * @param ctrl The LogCtrl command to execute
+ * @return LogStream& Reference to the resulting LogStream (same as input)
+ */
 LogStream& operator<<(LogStream &ls, LogCtrl &ctrl)
 {
 	// ToDo: decode ctrl value
 	(void)ctrl;
 
 	time_t t = time(0);
-	struct tm * now = localtime(&t);
+	struct tm now;
+	localtime_r(&t, &now);
 	std::ostringstream oss;
 	// Insert timestamp
-	oss << std::setw(2) << std::setfill('0') << now->tm_hour << ":";
-	oss << std::setw(2) << std::setfill('0') << now->tm_min  << ":";
-	oss << std::setw(2) << std::setfill('0') << now->tm_sec  << " ";
+	oss << std::setw(2) << std::setfill('0') << now.tm_hour << ":";
+	oss << std::setw(2) << std::setfill('0') << now.tm_min  << ":";
+	oss << std::setw(2) << std::setfill('0') << now.tm_sec  << " ";
 	// Insert the level code
 	if (ls.mLevel <= 10)
 		oss << "DBG ";
@@ -303,6 +377,13 @@ LogStream& operator<<(LogStream &ls, LogCtrl &ctrl)
 	return ls;
 }
 
+/**
+ * @brief Overload << operator to append an IP address
+ *
+ * @param ls Reference to the current LogStream
+ * @param in The in_addr strucure that contain the IP to append
+ * @return LogStream& Reference to the resulting LogStream (same as input)
+ */
 LogStream& operator<<(LogStream &ls, struct in_addr &in)
 {
 	std::ostringstream oss;
@@ -316,6 +397,13 @@ LogStream& operator<<(LogStream &ls, struct in_addr &in)
 	return ls;
 }
 
+/**
+ * @brief Overload << operator to append a Session id
+ *
+ * @param ls Reference to the current LogStream
+ * @param sess Pointer to the Session
+ * @return LogStream& Reference to the resulting LogStream (same as input)
+ */
 LogStream& operator<<(LogStream &ls, Session *sess)
 {
 	std::ostringstream oss;
@@ -324,6 +412,13 @@ LogStream& operator<<(LogStream &ls, Session *sess)
 	return ls;
 }
 
+/**
+ * @brief Overload << operator to append a pointer address (mainly for debug)
+ *
+ * @param ls Reference to the current LogStream
+ * @param ptr Pointer to an arbitrary address
+ * @return LogStream& Reference to the resulting LogStream (same as input)
+ */
 LogStream& operator<<(LogStream &ls, void *ptr)
 {
 	const void * address = static_cast<const void*>(ptr);
