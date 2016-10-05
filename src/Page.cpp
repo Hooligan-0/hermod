@@ -141,14 +141,14 @@ void Page::initSession(void)
 	Session      *sess = NULL;
 	std::string   sessId;
 	
-	std::string cfgSessionMode( cfg->get("global", "session_mode") );
+	std::string cfgSessionMode( cfg->get("global", "session_mode").toStdStr() );
 	if (cfgSessionMode.compare("cookie") == 0)
 	{
 		// Find Session ID using cookie
 		try {
 			std::string cookieName;
 			// Try to get the cookie name from config
-			cookieName = cfg->get("global", "session_cookie");
+			cookieName = cfg->get("global", "session_cookie").toStdStr();
 			// If this parameter is absent
 			if (cookieName.empty())
 				cookieName = "HERMOD_SESSION";

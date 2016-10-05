@@ -172,7 +172,7 @@ App* App::init(void)
 	Config *cfg = Config::getInstance();
 	
 	try {
-		std::string cfgFile;
+		String cfgFile;
 		cfgFile = cfg->get("global", "log_file");
 		Log::setFile(cfgFile);
 	} catch (std::exception& e) {
@@ -189,9 +189,9 @@ App* App::init(void)
 	size_t pos = 0;
 	while(1)
 	{
-		std::string name;
+		String name;
 		name = cfg->get("plugins", "load", &pos);
-		if (name.empty())
+		if (name.isEmpty())
 			break;
 		// Try to load the specified module
 		Module *newModule = mModuleCache.load( name );

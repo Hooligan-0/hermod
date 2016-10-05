@@ -99,21 +99,21 @@ static void config(int argc, char **argv)
 		std::cerr << "Failed to load config file " << cfgFilename << std::endl;
 	}
 	// Insert default config
-	if ( cfg->get("global", "root_src").empty() )
+	if ( cfg->get("global", "root_src").isEmpty() )
 		cfg->set("global",  "root_src", DEF_DIR_ROOT);
-	if ( cfg->get("global", "path_session").empty() )
+	if ( cfg->get("global", "path_session").isEmpty() )
 		cfg->set("global",  "path_session", DEF_DIR_SESS);
-	if ( cfg->get("global", "log_file").empty() )
+	if ( cfg->get("global", "log_file").isEmpty() )
 		cfg->set("global", "log_file", DEF_LOG_FILE);
-	if ( cfg->get("global", "session_mode").empty() )
+	if ( cfg->get("global", "session_mode").isEmpty() )
 		cfg->set("global", "session_mode", "cookie");
-	if ( cfg->get("plugins", "directory").empty() )
+	if ( cfg->get("plugins", "directory").isEmpty() )
 		cfg->set("plugins", "directory", DEF_DIR_PLUGINS);
 	// If the "-f" flag is set, this value override config
 	if ( cfgDaemon == false )
 		cfg->set("global", "daemon", "no");
 	// Else, if no no value has been readed for "daemon", set true
-	else if ( cfg->get("global", "daemon").empty() )
+	else if ( cfg->get("global", "daemon").isEmpty() )
 		cfg->set("global", "daemon", "yes");
 }
 

@@ -71,7 +71,7 @@ void Session::create(void)
 	rndKey = convert.str();
 	
 	Config  *cfg = Config::getInstance();
-	mFilename  = cfg->get("global", "path_session");
+	mFilename  = cfg->get("global", "path_session").toStdStr();
 	mFilename += "hermod-session-" + rndKey;
 	
 	// Save key to the cache
@@ -93,7 +93,7 @@ void Session::load(string key)
 	string sessionfile;
 
 	Config  *cfg = Config::getInstance();
-	sessionfile  = cfg->get("global", "path_session");
+	sessionfile  = cfg->get("global", "path_session").toStdStr();
 	sessionfile += "hermod-session-" + key;
 
 	if ( stat (sessionfile.c_str(), &buffer) )

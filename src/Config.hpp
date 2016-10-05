@@ -18,6 +18,7 @@
 #include <string>
 #include <cstddef> // std::size_t
 #include <vector>
+#include "String.hpp"
 #include "ConfigKey.hpp"
 
 namespace hermod {
@@ -34,11 +35,11 @@ class Config
 public:
 	static void destroy();
 	static Config* getInstance(void);
-	static Config* getInstance(const std::string &file);
-	std::string get(const std::string &group, const std::string &key, size_t *pos = 0);
+	static Config* getInstance(const String &filename);
+	String get(const String &group, const String &key, size_t *pos = 0);
 	ConfigKey  *getKey(const std::string &group, const std::string &key);
 	ConfigKey  *getKey(const std::string &group, int index);
-	std::string getName(void);
+	String      getName(void) const;
 	void set(const std::string &group,
 	         const std::string &key,
 	         const std::string &value);
@@ -52,10 +53,10 @@ private:
 		mFiles.clear();
 	};
 	~Config();
-	void setName(const std::string &name);
+	void setName(const String &name);
 private:
 	static Config* mInstance;
-	std::string    mName;
+	String         mName;
 	std::string    mFilename;
 	std::vector<ConfigGroup *> mGroups;
 	std::vector<Config *> mFiles;
@@ -70,13 +71,13 @@ class ConfigGroup
 public:
 	ConfigGroup();
 	~ConfigGroup();
-	std::string getName();
-	void setName(const std::string &name);
+	String     getName() const;
+	void setName(const String &name);
 	ConfigKey *createKey(const std::string &name, bool multiple = false);
 	ConfigKey *getKey   (const std::string &name, size_t *pos = 0);
 	ConfigKey *getKey   (unsigned int index);
 private:
-	std::string mName;
+	String mName;
 	std::vector<ConfigKey *> mKeys;
 };
 

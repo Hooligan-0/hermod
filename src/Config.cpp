@@ -81,21 +81,21 @@ Config* Config::getInstance(void)
 /**
  * @brief Get (or load) a secondary configuration file
  *
- * @param  file Name of the configuration file
+ * @param  filename Name of the configuration file
  * @return Config* Pointer to the config object for the specified file
  */
-Config* Config::getInstance(const std::string &file)
+Config* Config::getInstance(const String &filename)
 {
 	Config *mainCfg = getInstance();
 
-	if ( file.empty() )
+	if ( filename.isEmpty() )
 		return mainCfg;
 
 	// Search into the already loaded files
 	std::vector<Config *>::iterator it;
 	for (it = mainCfg->mFiles.begin(); it != mainCfg->mFiles.end(); ++it)
 	{
-		if (file.compare( (*it)->getName() ) == 0)
+		if ((*it)->getName() == filename)
 			return (*it);
 	}
 
@@ -108,20 +108,20 @@ Config* Config::getInstance(const std::string &file)
 		return 0;
 	}
 
-	std::string cfgfile = mainCfg->mFilename.substr(0, sep + 1);
-	cfgfile += file;
+	String cfgfile = mainCfg->mFilename.substr(0, sep + 1);
+	cfgfile += filename;
 	cfgfile += ".cfg";
 
 	// Test if the file exists
 	struct stat fileInfo;
-	if ( stat (cfgfile.c_str(), &fileInfo) )
+	if ( stat (cfgfile.data(), &fileInfo) )
 		return 0;
 
 	// Try to load the configuration file
 	Config *newFile = 0;
 	try {
 		newFile = new Config;
-		newFile->setName(file);
+		newFile->setName(filename);
 		newFile->load(cfgfile);
 
 		mainCfg->mFiles.push_back(newFile);
@@ -176,7 +176,7 @@ ConfigGroup *Config::getGroup(const std::string &name)
 	for (size_t i = 0; i < nbGroups; i++)
 	{
 		ConfigGroup *grp = mGroups.at(i);
-		if (name.compare(grp->getName()) == 0)
+		if (grp->getName() == name)
 			return grp;
 	}
 	return NULL;
@@ -190,7 +190,7 @@ ConfigGroup *Config::getGroup(const std::string &name)
  * @param  pos   Optional index into a key array
  * @return string Value of the key, as string
  */
-std::string Config::get(const std::string &group, const std::string &key, size_t *pos)
+String Config::get(const String &group, const String &key, size_t *pos)
 {
 	ConfigGroup *g;
 	ConfigKey   *k;
@@ -203,7 +203,7 @@ std::string Config::get(const std::string &group, const std::string &key, size_t
 	// Get the specified key into the group
 	k = g->getKey(key, pos);
 	if (k == NULL)
-		return std::string();
+		return String();
 	
 	return k->getValue();
 }
@@ -258,7 +258,7 @@ ConfigKey *Config::getKey(const std::string &group,
  *
  * @return string Name of this config
  */
-std::string Config::getName(void)
+String Config::getName(void) const
 {
 	return mName;
 }
@@ -349,7 +349,7 @@ void Config::set(const std::string &group,
  *
  * @param name New name to set
  */
-void Config::setName(const std::string &name)
+void Config::setName(const String &name)
 {
 	mName = name;
 }
@@ -376,11 +376,11 @@ ConfigGroup::~ConfigGroup()
 	}
 }
 
-std::string ConfigGroup::getName()
+String ConfigGroup::getName() const
 {
 	return mName;
 }
-void ConfigGroup::setName(const std::string &name)
+void ConfigGroup::setName(const String &name)
 {
 	mName = name;
 }
