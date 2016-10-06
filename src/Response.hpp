@@ -33,6 +33,7 @@ class Response {
 public:
 	explicit Response(Request *request = NULL);
 	~Response();
+	Content        *content();
 	ResponseHeader *header();
 	void catchCout  (void);
 	void releaseCout(void);

@@ -61,6 +61,16 @@ void Response::catchCout(void)
 }
 
 /**
+ * @brief Get access to the response content
+ *
+ * @return ResponseHeader Pointer to the current header object
+ */
+Content *Response::content(void)
+{
+	return mContent;
+}
+
+/**
  * @brief Get access to the response header
  *
  * @return ResponseHeader Pointer to the current header object
