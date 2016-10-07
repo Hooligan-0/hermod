@@ -48,7 +48,7 @@ public:
 	void        urlDecode(void);
 public:
 	static String number(unsigned long);
-private:
+protected:
 	void   copy(char *src, int len);
 	void   copy(const String &src);
 	void   realloc(size_t len);
@@ -74,6 +74,8 @@ public:
 public:
 	friend bool          operator==(const String&, const String&);
 	friend bool          operator==(const String&, const char *);
+	friend bool          operator!=(const String&, const String&);
+	friend bool          operator!=(const String&, const char *);
 	friend std::ostream& operator<<(std::ostream&, const String &);
 	friend bool          operator< (String const &a, String const &b);
 	friend String        operator+ (String const &a, const char *b);

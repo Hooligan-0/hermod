@@ -634,6 +634,39 @@ bool operator==(String const& src, const char *str)
 }
 
 /**
+ * @brief Test if the content of two strings are different
+ *
+ * @param src Reference to a string object (left member of "!=")
+ * @param str Reference to a string object (right member of "!=")
+ * @return boolean True if the two strings are different
+ */
+bool operator!=(String const& src, const String &str)
+{
+	// Use the "==" operator, and invert the result
+
+	if (src == str)
+		return false;
+	return true;
+}
+
+/**
+ * @brief Test if the content of a string and a c-string are different
+ *
+ * @param src Reference to a string object (left member of "!=")
+ * @param str Pointer to the c-string to compare
+ * @return boolean True if the two strings are different
+ */
+bool operator!=(String const& src, const char *str)
+{
+	// Use the "==" operator, and invert the result
+
+	if (src == str)
+		return false;
+	return true;
+}
+
+
+/**
  * @brief Compare alphabetical values of two strings
  *
  * @param a Reference to the first tested string
