@@ -47,6 +47,7 @@ public:
 	int         toInt    (void) const;
 	void        urlDecode(void);
 public:
+	static String hex(unsigned char *src, int len);
 	static String number(unsigned long);
 protected:
 	void   copy(char *src, int len);

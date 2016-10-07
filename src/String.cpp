@@ -542,6 +542,29 @@ String & String::operator+=(const char *src)
 
 // ------------------------------ Static Methods ------------------------------
 
+String String::hex(unsigned char *src, int len)
+{
+	const char hex[] = "0123456789abcdef";
+	char *tmpBuffer = (char *)malloc((len * 2) + 1);
+
+	char *d = tmpBuffer;
+	for (int i = 0; i < len; i++)
+	{
+		unsigned char b = *src;
+		*d = hex[b >> 4];
+		d++;
+		*d = hex[b & 0x0F];
+		d++;
+		src++;
+	}
+	*d = 0;
+
+	String result(tmpBuffer);
+	free(tmpBuffer);
+
+	return result;
+}
+
 String String::number(unsigned long n)
 {
 	char tmp[11];
