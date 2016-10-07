@@ -43,6 +43,7 @@ public:
 	size_t      length   (void) const;
 	void        reserve  (unsigned int size);
 	size_t      size     (void) const;
+	String      toBase64 (void) const;
 	std::string toStdStr (void) const;
 	int         toInt    (void) const;
 	void        urlDecode(void);

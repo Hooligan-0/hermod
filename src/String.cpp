@@ -17,6 +17,8 @@
 
 namespace hermod {
 
+const static char base64Lookup[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+
 /**
  * @brief Default constructor
  *
@@ -352,6 +354,55 @@ size_t String::size(void) const
 {
 	return mSize;
 }
+
+/**
+ * @brief Encode the string content into base64
+ *
+ * @return String Copy of this string, encoded into base64
+ */
+String String::toBase64(void) const
+{
+	int dstLen = (( (mLength / 3) + ((mLength % 3) > 0) ) * 4);
+	String result;
+	result.reserve(dstLen);
+	
+	long temp;
+	unsigned char *s = (unsigned char *)mBuffer;
+	unsigned char *d = (unsigned char *)result.data();
+	for (unsigned int i = 0; i < (mLength / 3); i++)
+	{
+		// Read three bytes from input buffer
+		temp  = (*s++) << 16;
+		temp += (*s++) << 8;
+		temp += (*s++);
+		// Write four bytes to output buffer
+		*d++ = base64Lookup[(temp & 0x00FC0000) >> 18];
+		*d++ = base64Lookup[(temp & 0x0003F000) >> 12];
+		*d++ = base64Lookup[(temp & 0x00000FC0) >> 6 ];
+		*d++ = base64Lookup[(temp & 0x0000003F)      ];
+	}
+	// Encode remaining bytes
+	switch(mLength % 3)
+	{
+		case 1:
+			temp  = (*s++) << 16;
+			*d++ = base64Lookup[(temp & 0x00FC0000) >> 18];
+			*d++ = base64Lookup[(temp & 0x0003F000) >> 12];
+			*d++ = '=';
+			*d++ = '=';
+			break;
+		case 2:
+			temp  = (*s++) << 16;
+			temp += (*s++) << 8;
+			*d++ = base64Lookup[(temp & 0x00FC0000) >> 18];
+			*d++ = base64Lookup[(temp & 0x0003F000) >> 12];
+			*d++ = base64Lookup[(temp & 0x00000FC0) >> 6 ];
+			*d++ = '=';
+			break;
+	}
+	return result;
+}
+
 
 /**
  * @brief Convert the numeric string (base 10) to an integer
