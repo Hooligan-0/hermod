@@ -55,6 +55,7 @@ String::String(const char *src)
 	mLength = 0;
 	mSize   = 0;
 
+	// Sanity check
 	if (src == 0)
 		return;
 
@@ -78,6 +79,11 @@ String::String(const std::string &src)
 	mBuffer = 0;
 	mLength = 0;
 	mSize   = 0;
+
+	// If the source string is empty, nothing more to do
+	if (src.length() == 0)
+		return;
+
 	// Copy the content of the std:string
 	copy((char *)src.c_str(), src.length());
 }
@@ -102,6 +108,10 @@ String & String::append(const String &src)
 {
 	char *s;
 	char *p;
+
+	// If the source string is empty, nothing to do
+	if (src.length() == 0)
+		return *this;
 
 	// Compute the new total length
 	int len = (mLength + src.length());
@@ -155,6 +165,10 @@ String & String::append(const String &src)
 String & String::append(const char *src)
 {
 	char *s;
+
+	// Sanity check - If source pointer is NULL, nothing to append
+	if (src == 0)
+		return *this;
 
 	// Compute the length of the string to append
 	unsigned int srcLen = 0;
@@ -229,7 +243,7 @@ void String::clear(void)
  */
 void String::copy(char *src, int len)
 {
-	if (len == 0)
+	if ((src == 0) || (len == 0))
 	{
 		clear();
 		return;
@@ -364,6 +378,11 @@ String String::toBase64(void) const
 {
 	int dstLen = (( (mLength / 3) + ((mLength % 3) > 0) ) * 4);
 	String result;
+
+	if (dstLen == 0)
+		return result;
+
+	// Pre-allocate memory to hold result data
 	result.reserve(dstLen);
 	
 	long temp;
@@ -403,7 +422,6 @@ String String::toBase64(void) const
 	return result;
 }
 
-
 /**
  * @brief Convert the numeric string (base 10) to an integer
  *
@@ -412,6 +430,10 @@ String String::toBase64(void) const
 int String::toInt(void) const
 {
 	int result = 0;
+
+	// Sanity check - If the current string is NULL, nothing to convert
+	if (mBuffer == 0)
+		return 0;
 
 	char *c = mBuffer;
 
@@ -509,6 +531,14 @@ void String::urlDecode(void)
  */
 String & String::operator=(const String & src)
 {
+	// If the source string is a empty
+	if (src.isEmpty())
+	{
+		// Nothing to copy, clear current content and return
+		clear();
+		return *this;
+	}
+
 	copy((char *)src.data(), src.length());
 	
 	return *this;
@@ -529,7 +559,7 @@ String & String::operator=(const char *src)
 		clear();
 		return *this;
 	}
-	
+
 	// Compute string length
 	char *p = (char *)src;
 	while(*p)
@@ -549,6 +579,14 @@ String & String::operator=(const char *src)
  */
 String & String::operator=(const std::string &src)
 {
+	// If the source string is a empty
+	if (src.empty())
+	{
+		// Nothing to copy, clear current content and return
+		clear();
+		return *this;
+	}
+
 	// Copy the content of the std:string
 	copy((char *)src.c_str(), src.length());
 	
@@ -563,6 +601,9 @@ String & String::operator=(const std::string &src)
  */
 String & String::operator+(const char *src)
 {
+	if (src == 0)
+		return *this;
+
 	append(src);
 	return *this;
 }
@@ -587,6 +628,9 @@ String & String::operator+=(const String &src)
  */
 String & String::operator+=(const char *src)
 {
+	if (src == 0)
+		return *this;
+
 	append(src);
 	return *this;
 }
@@ -738,7 +782,6 @@ bool operator!=(String const& src, const char *str)
 		return false;
 	return true;
 }
-
 
 /**
  * @brief Compare alphabetical values of two strings
