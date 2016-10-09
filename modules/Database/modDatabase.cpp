@@ -84,9 +84,9 @@ DB *ModDatabase::get(const std::string &name)
 		Config *cfg  = Config::getInstance("database");
 		if (cfg)
 		{
-			dbName = cfg->get(sysname, "name");
-			dbUser = cfg->get(sysname, "username");
-			dbPass = cfg->get(sysname, "password");
+			dbName = cfg->get(sysname, "name").toStdStr();
+			dbUser = cfg->get(sysname, "username").toStdStr();
+			dbPass = cfg->get(sysname, "password").toStdStr();
 		}
 		// If no dedicated file, load config from main config
 		else
@@ -96,9 +96,9 @@ DB *ModDatabase::get(const std::string &name)
 				return 0;
 
 			cfg  = Config::getInstance();
-			dbName = cfg->get("mod:database", "name");
-			dbUser = cfg->get("mod:database", "username");
-			dbPass = cfg->get("mod:database", "password");
+			dbName = cfg->get("mod:database", "name").toStdStr();
+			dbUser = cfg->get("mod:database", "username").toStdStr();
+			dbPass = cfg->get("mod:database", "password").toStdStr();
 		}
 
 		if ( ! dbName.empty() )

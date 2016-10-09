@@ -21,6 +21,10 @@
 namespace hermod {
 	namespace Database {
 
+/**
+ * @class ModDatabase
+ *
+ */
 class ModDatabase : public Module
 {
 public:
