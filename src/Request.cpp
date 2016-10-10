@@ -191,6 +191,27 @@ std::string Request::getUri(unsigned int n = 0)
 }
 
 /**
+ * @brief Test if a FORM field with specified name has been received
+ *
+ * @param name Name of the searched field
+ * @return boolean True if a field with given name exists
+ **/
+bool Request::hasFormValue(const String &name)
+{
+	// If the list of received variables is empty, refresh it
+	if (mFormParameters.empty())
+		loadFormInputs();
+
+	std::map<String, String>::iterator it;
+	it = mFormParameters.find(name);
+
+	if (it != mFormParameters.end())
+		return true;
+
+	return false;
+}
+
+/**
  * @brief Read the posted content and insert variables into form cache
  *
  */
@@ -272,11 +293,6 @@ void Request::setUri(const std::string &route)
 	std::istringstream qs( args );
 	for(std::string token; getline(qs, token, '/'); )
 		mUri.push_back(token);
-	
-	Log::debug() << "setUri " << mUri.at(0);
-	Log::debug() << "  route " << route;
-	Log::debug() << "  args count  " << mUri.size();
-	Log::debug() << "  args  " << args << Log::endl;
 }
 
 } // namespace hermod
