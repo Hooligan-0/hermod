@@ -21,7 +21,7 @@ SRC += Content.cpp
 SRC += ContentHtml.cpp ContentHtml/HtmlElement.cpp ContentHtml/HtmlTag.cpp
 SRC += ContentHtml/HtmlHtml.cpp ContentHtml/HtmlH.cpp ContentHtml/Template.cpp
 SRC += ContentJson.cpp ContentJson/JsonElement.cpp ContentJson/JsonObject.cpp
-SRC += ContentJson/JsonString.cpp
+SRC += ContentJson/JsonArray.cpp ContentJson/JsonString.cpp
 SRC += Response.cpp ResponseHeader.cpp
 
 INSTALL="/usr/local"
