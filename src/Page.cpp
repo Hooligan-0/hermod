@@ -12,7 +12,6 @@
  *
  * Authors: Saint-Genest Gwenael <gwen@hooligan0.net>
  */
-#include <iostream>
 #include <string>
 #include "Config.hpp"
 #include "Log.hpp"
@@ -127,10 +126,10 @@ ContentJson *Page::initContentJson(void)
  * @brief Start the session layer for the current request
  *
  */
-void Page::initSession(void)
+void Page::initSession(int mode)
 {
 	// Test if this page require session
-	if ( ! mUseSession)
+	if ((mode == 0) && ( ! mUseSession))
 		return;
 	// Test if session already init
 	if (mSession)
@@ -140,40 +139,73 @@ void Page::initSession(void)
 	SessionCache *sc   = SessionCache::getInstance();
 	Session      *sess = NULL;
 	std::string   sessId;
+	std::string   cookieName;
 	
-	std::string cfgSessionMode( cfg->get("global", "session_mode").toStdStr() );
-	if (cfgSessionMode.compare("cookie") == 0)
+	if (mode == 0)
 	{
-		// Find Session ID using cookie
+		String cfgSessionMode( cfg->get("global", "session_mode") );
+		if (cfgSessionMode == "cookie")
+			mode = 1;
+		else if (cfgSessionMode == "token")
+			mode = 2;
+		else
+		{
+			Log::info() << "Page: Could not load session, unknown mode ";
+			Log::info() << cfgSessionMode << Log::endl;
+			return;
+		}
+		Log::debug() << "Page::initSession config mode " << mode << Log::endl;
+	}
+
+	loadSession(mode);
+
+	if ( ! mSession)
+	{
 		try {
-			std::string cookieName;
-			// Try to get the cookie name from config
-			cookieName = cfg->get("global", "session_cookie").toStdStr();
-			// If this parameter is absent
-			if (cookieName.empty())
-				cookieName = "HERMOD_SESSION";
-			try {
-				sessId = mRequest->getCookieByName(cookieName, false);
-				sess = sc->getById(sessId);
-				if (sess == 0)
-				{
-					Log::debug() << "Page: try to load an unknown session " << sessId << Log::endl;
-					throw -1;
-				}
-				Log::debug() << "Page: load session " << sessId << Log::endl;
-			} catch (...) {
-			}
-			
-			if ( ! sess)
+			sess = sc->create();
+			if (sess == NULL)
+				throw runtime_error("Failed to create a new session");
+			Log::debug() << "Page::initSession create session " << sess->getId() << Log::endl;
+			if (mode == 1)
 			{
-				sess = sc->create();
-				if (sess == NULL)
-					throw runtime_error("Failed to create a new session");
 				std::string cookie( cookieName );
 				cookie += "=" + sess->getId();
 				mResponse->header()->addHeader("Set-Cookie", cookie);
 				Log::debug() << "Page: create session " << sess->getId() << Log::endl;
 			}
+			mSession = sess;
+		} catch (...) {
+		}
+	}
+}
+
+/**
+ * @brief Load the session layer for the current request
+ *
+ */
+void Page::loadSession(int mode)
+{
+	Config       *cfg  = Config::getInstance();
+	SessionCache *sc   = SessionCache::getInstance();
+	Session      *sess = NULL;
+
+	if (mode == 1)
+	{
+		// Find Session ID using cookie
+		try {
+			// Try to get the cookie name from config
+			String cookieName( cfg->get("global", "session_cookie") );
+			// If this parameter is absent
+			if (cookieName.isEmpty())
+				cookieName = "HERMOD_SESSION";
+			std::string sessId = mRequest->getCookieByName(cookieName, false);
+			sess = sc->getById(sessId);
+			if (sess == 0)
+			{
+				Log::debug() << "Page: try to load an unknown session " << sessId << Log::endl;
+				throw -1;
+			}
+			Log::debug() << "Page: load session " << sessId << Log::endl;
 			mSession = sess;
 		} catch (std::exception &e) {
 			Log::error() << "Page: Session error : " << e.what() << Log::endl;
@@ -181,18 +213,22 @@ void Page::initSession(void)
 			Log::error() << "Page: Session unknown error" << Log::endl;
 		}
 	}
-	else if (cfgSessionMode.compare("token") == 0)
+	// Load Session using token
+	else if (mode == 2)
 	{
-		// Second, try to find Session ID using token
 		try {
-			//
+			String token( request()->getFormValue("token") );
+			if (token.isEmpty())
+				throw -2;
+			sess = sc->getById(token);
+			if (sess == 0)
+			{
+				Log::debug() << "Page: try to load an unknown session " << token << Log::endl;
+				throw -1;
+			}
+			mSession = sess;
 		} catch (...) {
 		}
-	}
-	else
-	{
-		Log::info() << "Page: Could not load session, unknown mode ";
-		Log::info() << cfgSessionMode << Log::endl;
 	}
 }
 
@@ -235,7 +271,11 @@ Response *Page::response(void)
 Session *Page::session(void)
 {
 	if (mSession == 0)
+	{
 		initSession();
+		if (mSession == 0)
+			throw runtime_error("no session");
+	}
 
 	return mSession;
 }

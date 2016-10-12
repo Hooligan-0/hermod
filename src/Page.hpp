@@ -44,7 +44,8 @@ public:
 	Page();
 	void   setRequest(Request   *obj);
 	void   setReponse(Response  *obj);
-	void   initSession(void);
+	void   initSession(int mode = 0);
+	void   loadSession(int mode = 0);
 	
 	Content     *initContent(void);
 	ContentHtml *initContentHtml(void);
