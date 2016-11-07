@@ -35,6 +35,15 @@ Page::Page(void)
 }
 
 /**
+ * @brief Default destructor
+ *
+ */
+Page::~Page(void)
+{
+	// Nothing to do but needed for derivated classes
+}
+
+/**
  * @brief Get Uri (or argument) of the request
  *
  * This method allow to get a part of the original URI, after analysis by

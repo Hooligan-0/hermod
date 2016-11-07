@@ -42,6 +42,7 @@ class Page
 {
 public:
 	Page();
+	virtual ~Page();
 	void   setRequest(Request   *obj);
 	void   setReponse(Response  *obj);
 	void   initSession(int mode = 0);
