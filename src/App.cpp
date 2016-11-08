@@ -250,8 +250,6 @@ void App::processFcgi (void)
 
 	if (req->getMethod() == Request::Option)
 	{
-		Log::info() << "App: OPTION request received" << Log::endl;
-		
 		ResponseHeader *rh = rsp->header();
 		rh->addHeader("Allow", "HEAD,GET,PUT,DELETE,OPTIONS");
 		rh->addHeader("Access-Control-Allow-Headers", "access-control-allow-origin,x-requested-with");
