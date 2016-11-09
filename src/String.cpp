@@ -304,6 +304,30 @@ char *String::data(void) const
 }
 
 /**
+ * @brief Get a substring with this first 'n' left characters
+ *
+ * @param n Number of characters to get
+ * @return String A new string with a copy of 'n' characters
+ */
+String String::left(unsigned int n)
+{
+	String subString;
+
+	// If the current string is NULL, return empty String
+	if (mBuffer == 0)
+		return subString;
+
+	// If the requested length is greater than string length
+	if (n > mLength)
+		// Limit to the number of available bytes
+		n = mLength;
+
+	subString.copy(mBuffer, n);
+
+	return subString;
+}
+
+/**
  * @brief Get the length of the string (in bytes)
  *
  * @return size_t Number of bytes into the string
@@ -352,6 +376,32 @@ void String::reserve(unsigned int size)
 	realloc(size + 1);
 	mBuffer[size] = 0;
 	mLength = size;
+}
+
+/**
+ * @brief Get a substring with the last 'n' characters
+ *
+ * @param n Number of characters to get
+ * @return String A new string with a copy of the last 'n' characters
+ */
+String String::right(unsigned int n)
+{
+	String subString;
+
+	// If the current string is NULL, return empty String
+	if (mBuffer == 0)
+		return subString;
+
+	// If the requested length is greater than string length
+	if (n > mLength)
+		// Limit to the number of available bytes
+		n = mLength;
+
+	unsigned int offset = (mLength - n);
+
+	subString.copy(mBuffer + offset, n);
+
+	return subString;
 }
 
 void String::setLength(size_t len)

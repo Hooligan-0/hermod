@@ -40,8 +40,10 @@ public:
 	void        clear    (void);
 	char       *data     (void) const;
 	bool        isEmpty  (void) const;
+	String      left     (unsigned int n);
 	size_t      length   (void) const;
 	void        reserve  (unsigned int size);
+	String      right    (unsigned int n);
 	size_t      size     (void) const;
 	String      toBase64 (void) const;
 	std::string toStdStr (void) const;
