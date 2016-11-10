@@ -338,6 +338,34 @@ size_t String::length(void) const
 }
 
 /**
+ * @brief Get a substring of 'n' characters from any position into the string
+ *
+ * @param pos Position of the first byte of the substring
+ * @param n   Number of characters to get
+ * @return String A new string with a copy of 'n' bytes
+ */
+String String::mid(int pos, int n)
+{
+	String result;
+
+	// Negative pos is not supported yet, return empty string
+	if (pos < 0)
+		return result;
+
+	// Check the maximum length of the substring
+	int copyLen = (mLength - pos);
+	// If the requested size is greater, reduce to maximum value
+	if (n > copyLen)
+		n = copyLen;
+
+	// Copy substring into result
+	result.copy(mBuffer + pos, n);
+
+	return result;
+}
+
+
+/**
  * @brief Allocate (or re-allocate) memory to hold the string content
  *
  * @param len Size of the needed memory (in bytes)
