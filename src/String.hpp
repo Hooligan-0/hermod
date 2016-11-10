@@ -42,6 +42,7 @@ public:
 	bool        isEmpty  (void) const;
 	String      left     (unsigned int n);
 	size_t      length   (void) const;
+	String      mid      (int pos, int n = -1);
 	void        reserve  (unsigned int size);
 	String      right    (unsigned int n);
 	size_t      size     (void) const;
