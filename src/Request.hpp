@@ -40,6 +40,7 @@ public:
 	~Request();
 	unsigned int     countUriArgs(void);
 	FCGX_Request    *getFCGX  (void);
+	String           getContentType(void);
 	Request::Method  getMethod(void);
 	String           getParam (const String &name);
 	std::string getUri(unsigned int n);

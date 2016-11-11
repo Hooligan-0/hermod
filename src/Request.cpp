@@ -125,6 +125,18 @@ FCGX_Request *Request::getFCGX(void)
 }
 
 /**
+ * @brief Get the content type of the request
+ *
+ * @return String Mime type of the request
+ */
+String Request::getContentType(void)
+{
+	String result;
+	result = getParam("CONTENT_TYPE");
+	return result;
+}
+
+/**
  * @brief Get the HTTP method of this request
  *
  * @return Method The requested method
