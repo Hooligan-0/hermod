@@ -21,6 +21,7 @@
 #include "App.hpp"
 #include "config.h"
 #include "Config.hpp"
+#include "String.hpp"
 
 using namespace hermod;
 
