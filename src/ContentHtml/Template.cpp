@@ -14,6 +14,7 @@
  *
  * Authors: Tomas Andrle (Original library)
  */
+#include <stdexcept>
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>

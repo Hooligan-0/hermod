@@ -16,6 +16,7 @@
 #include "Config.hpp"
 #include "Log.hpp"
 #include <dlfcn.h>
+#include <stdexcept>
 
 namespace hermod {
 

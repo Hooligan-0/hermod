@@ -12,6 +12,7 @@
  *
  * Authors: Saint-Genest Gwenael <gwen@hooligan0.net>
  */
+#include <stdexcept>
 #include "Config.hpp"
 #include "Log.hpp"
 #include "Router.hpp"
