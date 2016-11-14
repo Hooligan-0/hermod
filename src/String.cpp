@@ -304,6 +304,102 @@ char *String::data(void) const
 }
 
 /**
+ * @brief Search the first occurence of a character into the string
+ *
+ * @param c    Character to find
+ * @param from Offset where to start the search (default 0 for first character)
+ * @return int Position of the first occurence of the character
+ */
+int String::indexOf(char c, int from) const
+{
+	unsigned int searchPos;
+
+	// If the string is NULL, return with error
+	if (mBuffer == 0)
+		return -1;
+
+	// If a negative start position has been specified
+	if (from < 0)
+	{
+		// Compute the offset from the string length
+		int testPos = mLength + from;
+		if (testPos < 0)
+			return -1;
+		searchPos = testPos;
+	}
+	// Else, a positive (or nul) offset has been specified
+	else
+	{
+		// Test if the requested offset if greater than length
+		int test = mLength - from;
+		if (test < 0)
+			return -1;
+		// Ok, use the specified offset
+		searchPos = from;
+	}
+
+	// Do the search !
+	while(searchPos < mSize)
+	{
+		if (mBuffer[searchPos] == c)
+			break;
+		searchPos++;
+	}
+	// If the search has reach the end of buffer
+	if (searchPos == mSize)
+		// Set error value for result
+		searchPos = -1;
+
+	return searchPos;
+}
+
+/**
+ * @brief Search the last occurence of a character into the string
+ *
+ * @param c    Character to find
+ * @param from Offset where to start the search (default -1 for last character)
+ * @return int Position of the last occurence of the character
+ */
+int String::lastIndexOf(char c, int from) const
+{
+	int searchPos;
+
+	// If the string is NULL, return with error
+	if (mBuffer == 0)
+		return -1;
+
+	// If a negative start position has been specified
+	if (from < 0)
+	{
+		// Compute the offset from the string length
+		searchPos = mLength + from;
+		if (searchPos < 0)
+			return -1;
+	}
+	// Else, a positive (or nul) offset has been specified
+	else
+	{
+		// Test if the requested offset if greater than length
+		searchPos = mLength - from;
+		if (searchPos < 0)
+			return -1;
+		// Ok, use the specified offset
+		searchPos = from;
+	}
+
+	// Do the search !
+	while(searchPos >= 0)
+	{
+		if (mBuffer[searchPos] == c)
+			break;
+		searchPos--;
+	}
+
+	return searchPos;
+}
+
+
+/**
  * @brief Get a substring with this first 'n' left characters
  *
  * @param n Number of characters to get

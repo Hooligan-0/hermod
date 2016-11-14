@@ -39,7 +39,9 @@ public:
 	String     &append   (const char   *src);
 	void        clear    (void);
 	char       *data     (void) const;
+	int         indexOf  (char c, int from = 0) const;
 	bool        isEmpty  (void) const;
+	int         lastIndexOf(char c, int from = -1) const;
 	String      left     (unsigned int n);
 	size_t      length   (void) const;
 	String      mid      (int pos, int n = -1);
