@@ -276,18 +276,6 @@ void String::copy(const String &src)
 }
 
 /**
- * @brief Test if the length of the String is nul.
- *
- * @return boolean True if the data length is 0
- */
-bool String::isEmpty(void) const
-{
-	if (mLength == 0)
-		return true;
-	return false;
-}
-
-/**
  * @brief Get a pointer to internal data buffer
  *
  * This method allow to get a direct access to internal datas. The returned
@@ -351,6 +339,18 @@ int String::indexOf(char c, int from) const
 		searchPos = -1;
 
 	return searchPos;
+}
+
+/**
+ * @brief Test if the length of the String is nul.
+ *
+ * @return boolean True if the data length is 0
+ */
+bool String::isEmpty(void) const
+{
+	if (mLength == 0)
+		return true;
+	return false;
 }
 
 /**
