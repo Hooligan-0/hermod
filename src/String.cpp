@@ -635,6 +635,32 @@ std::string String::toStdStr(void) const
 }
 
 /**
+ * @brief Cut the string at a specified position
+ *
+ * @param pos Position where to cut the string
+ */
+void String::truncate(unsigned int pos)
+{
+	// If the requested position is 0, clear the whole string
+	if (pos == 0)
+	{
+		clear();
+		return;
+	}
+
+	// If the requested position is greater than string length ...
+	if (pos > mLength)
+		// ... nothing to do :)
+		return;
+	
+	// Insert a 0x00 at the specified position
+	mBuffer[pos] = 0;
+	// Update the current length
+	mLength = pos;
+}
+
+
+/**
  * @brief Decode the current string that contains urlencoded data
  *
  * This method is used to convert a string from urlencoded format to binary data. There is

@@ -51,6 +51,7 @@ public:
 	String      toBase64 (void) const;
 	std::string toStdStr (void) const;
 	int         toInt    (void) const;
+	void        truncate (unsigned int pos);
 	void        urlDecode(void);
 public:
 	static String hex(unsigned char *src, int len);
