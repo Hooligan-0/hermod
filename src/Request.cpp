@@ -133,6 +133,13 @@ String Request::getContentType(void)
 {
 	String result;
 	result = getParam("CONTENT_TYPE");
+
+	// Search the parameter separator (if any)
+	int sep = result.indexOf(';');
+	// If a separator exists, cut the string to keep only typs/subtype
+	if (sep)
+		result.truncate(sep);
+
 	return result;
 }
 
