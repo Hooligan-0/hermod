@@ -16,6 +16,7 @@
 #include "Module.hpp"
 #include "Page.hpp"
 #include "modDummy.hpp"
+#include "Page404.hpp"
 #include "PageHello.hpp"
 #include "PageHelloJson.hpp"
 
@@ -62,13 +63,19 @@ void ModDummy::initRouter(Router *router)
 	tgt = router->createTarget(this);
 	tgt->setName("hello_json");
 	tgt->enable();
+	// Create a target for the error 404 page
+	tgt = router->createTarget(this);
+	tgt->setName("err_404");
+	tgt->enable();
 }
 
 Page *ModDummy::newPage(const std::string &name)
 {
 	Page *page = NULL;
 	
-	if (name.compare("hello") == 0)
+	if (name.compare("err_404") == 0)
+		page = new Page404();
+	else if (name.compare("hello") == 0)
 		page = new PageHello();
 	else if (name.compare("hello_json") == 0)
 		page = new PageHelloJson();

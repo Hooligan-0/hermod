@@ -13,7 +13,7 @@
  # Authors: Saint-Genest Gwenael <gwen@hooligan0.net>
  #
 TARGET=dummy.so
-SRC=modDummy.cpp PageHello.cpp PageHelloJson.cpp
+SRC=modDummy.cpp Page404.cpp PageHello.cpp PageHelloJson.cpp
 
 CC=g++
 CP=cp
