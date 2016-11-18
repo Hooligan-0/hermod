@@ -47,6 +47,7 @@ public:
 	String      getFormValue (const String &name);
 	std::string getCookieByName(const std::string &name, bool allowEmpty);
 	bool        hasFormValue (const String &name);
+	bool        isAccept(const String &type);
 	void        setUri(const std::string &route);
 protected:
 	void        loadFormInputs(void);

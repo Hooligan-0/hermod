@@ -231,6 +231,51 @@ bool Request::hasFormValue(const String &name)
 }
 
 /**
+ * @brief Test if a specific mime-type is delared into accept header
+ *
+ * @param  type String that contains the name of tested mime type
+ * @return boolean True if the specified mime-type is found into Accept header
+ */
+bool Request::isAccept(const String &type)
+{
+	String acceptTypes = getParam("ACCEPT");
+	if (acceptTypes.isEmpty())
+		return false;
+
+	// Find the separator for parameters
+	int pSep = acceptTypes.indexOf(';');
+	// If found, cut the string to ignore additional parameters
+	if (pSep >= 0)
+		acceptTypes.truncate(pSep);
+
+	// Split Accept string and test each types into
+	int idxStart = 0;
+	while (idxStart >= 0)
+	{
+		String item;
+		// Search next separator character
+		int idxSep = acceptTypes.indexOf(',', idxStart);
+		// If a separator has been found
+		if (idxSep > 0)
+		{
+			item = acceptTypes.mid(idxStart, idxSep - idxStart);
+			// ToDo : remove spaces at the begining/end of string
+			idxStart = (idxSep + 1);
+		}
+		// Else, it is te last item
+		else
+		{
+			item = acceptTypes.right(acceptTypes.length() - idxStart);
+			idxStart = -1;
+		}
+		// If this item is equal to searched type, good news :)
+		if (item == type)
+			return true;
+	}
+	return false;
+}
+
+/**
  * @brief Read the posted content and insert variables into form cache
  *
  */
