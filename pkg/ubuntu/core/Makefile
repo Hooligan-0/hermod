@@ -1,5 +1,5 @@
 
-BUILD_DIR=./hermod_0.2
+BUILD_DIR=./hermod_0.3.0
 
 CP=cp -a
 MAKE=make
@@ -34,7 +34,7 @@ install:
 clean:
 	rm -f $(BUILD_DIR).deb
 	rm -rf $(BUILD_DIR)
-	rm -f *~
+	rm -f *~ config/*~ DEBIAN/*~
 
 ../../../src/hermod:
 	@$(MAKE) -C ../../../src/

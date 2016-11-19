@@ -1,5 +1,5 @@
 
-BUILD_DIR=./hermod_0.2_dev
+BUILD_DIR=./hermod_0.3.0_dev
 
 CP=cp -a
 MAKE=make
@@ -35,4 +35,4 @@ install:
 clean:
 	rm -f $(BUILD_DIR).deb
 	rm -rf $(BUILD_DIR)
-	rm -f *~
+	rm -f *~ config/*~ DEBIAN/*~

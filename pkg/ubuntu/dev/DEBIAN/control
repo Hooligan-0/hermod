@@ -1,5 +1,5 @@
 Package: hermod-dev
-Version: 0.2
+Version: 0.3.0
 Section: httpd
 Priority: optional
 Source: hermod
