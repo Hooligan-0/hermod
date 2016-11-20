@@ -21,6 +21,11 @@ least two variables are required :
 * REQUEST_METHOD used to detect if the request contains datas (GET, POST)
 or informations (HEAD, OPTIONS)
 
+Also, two more wariable can optionally be added if the application use
+different mime types :
+* ACCEPT used by Request class to handle the list of accepted mime
+* CONTENT_TYPE used to determine the mime type additional received datas
+
 Here, an example of the minimal nginx server configuration for Hermod :
 ```
 server {
@@ -37,7 +42,10 @@ server {
         fastcgi_param  GATEWAY_INTERFACE  CGI/1.1;
         fastcgi_param  QUERY_STRING       $query_string;
         fastcgi_param  REQUEST_METHOD     $request_method;
-    }
+        # Optional (but usefull) parameters
+        #fastcgi_param  ACCEPT             $http_accept;
+        #fastcgi_param  CONTENT_TYPE       $content_type;
+,    }
 }
 ```
 
