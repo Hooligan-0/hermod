@@ -45,6 +45,7 @@ public:
 	String      left     (unsigned int n);
 	size_t      length   (void) const;
 	String      mid      (int pos, int n = -1);
+	String     &remove   (int pos, int n);
 	void        reserve  (unsigned int size);
 	String      right    (unsigned int n);
 	size_t      size     (void) const;

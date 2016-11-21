@@ -494,6 +494,57 @@ void String::realloc(size_t len)
 }
 
 /**
+ * @brief Remove characters at any position into the string
+ *
+ * @param pos Position of the first character to remove
+ * @param n   Number of characters to remove
+ */
+String &String::remove(int pos, int n)
+{
+	int currentLen = mLength;
+	// If the start position is beyond the end of string
+	if (pos > currentLen)
+		// Nothing to remove ... return current string
+		return *this;
+
+	// Pointer to the beginning of modified datas
+	char *pDst = (mBuffer + pos);
+	// Pointer after the removed datas
+	char *pSrc = (pDst + n);
+	// Pointer to the buffer end
+	char *pEnd = (mBuffer + mLength);
+
+	if (pSrc > pEnd)
+		pSrc = pEnd;
+
+	int lenBegin = pos;
+	int lenEnd   = (int)(pEnd - pSrc);
+
+	if ((lenBegin == 0) && (lenEnd == 0))
+	{
+		clear();
+		return *this;
+	}
+
+	// Do copy !
+	int removed = 0;
+	for (int i = pos; i < currentLen; ++i)
+	{
+		*pDst = *pSrc;
+		pDst ++;
+		if (pSrc < pEnd)
+		{
+			pSrc++;
+			removed++;
+		}
+	}
+
+	// Update the string length
+	mLength = lenBegin + lenEnd;
+	return *this;
+}
+
+/**
  * @brief Force the allocation of a specified content size
  *
  * @param size The size (in bytes) of the content
