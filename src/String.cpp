@@ -243,7 +243,7 @@ void String::clear(void)
  */
 void String::copy(char *src, int len)
 {
-	if ((src == 0) || (len == 0))
+	if ((src == 0) || (len <= 0))
 	{
 		clear();
 		return;
@@ -446,6 +446,10 @@ String String::mid(int pos, int n)
 
 	// Negative pos is not supported yet, return empty string
 	if (pos < 0)
+		return result;
+
+	// If a negative (or nul) length is requested, nothing to do
+	if (n <= 0)
 		return result;
 
 	// Check the maximum length of the substring
@@ -862,9 +866,9 @@ String String::hex(unsigned char *src, int len)
 
 String String::number(unsigned long n)
 {
-	char tmp[11];
+	char tmp[32];
 
-	char *p = (tmp + 11);
+	char *p = (tmp + 31);
 	*p = 0;
 
 	do
@@ -872,6 +876,8 @@ String String::number(unsigned long n)
 		char digit = '0' + (n % 10);
 		*--p = digit;
 		n /= 10;
+		if (p == tmp)
+			break;
 	}
 	while (n != 0);
 
