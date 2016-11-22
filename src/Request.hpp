@@ -38,23 +38,23 @@ public:
 public:
 	explicit Request(FCGX_Request *req);
 	~Request();
-	unsigned int     countUriArgs(void);
-	FCGX_Request    *getFCGX  (void);
-	String           getContentType(void);
-	Request::Method  getMethod(void);
-	String           getParam (const String &name);
-	std::string getUri(unsigned int n);
-	String      getFormValue (const String &name);
-	std::string getCookieByName(const std::string &name, bool allowEmpty);
-	bool        hasFormValue (const String &name);
-	bool        isAccept(const String &type);
-	void        setUri(const std::string &route);
+	unsigned int  countUriArgs(void);
+	FCGX_Request *getFCGX (void);
+	String  getContentType(void);
+	Method  getMethod(void);
+	String  getParam (const String &name);
+	String  getUri   (unsigned int n);
+	String  getFormValue (const String &name);
+	String  getCookieByName(const String &name, bool allowEmpty);
+	bool    hasFormValue (const String &name);
+	bool    isAccept(const String &type);
+	void    setUri  (const String &route);
 protected:
-	void        loadFormInputs(void);
+	void    loadFormInputs(void);
 private:
 	FCGX_Request  *mFcgiRequest;
 	Method         mMethod;
-	std::vector<std::string> mUri;
+	std::vector<String>       mUri;
 	std::map <String, String> mFormParameters;
 };
 

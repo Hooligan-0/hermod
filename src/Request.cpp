@@ -30,11 +30,12 @@ Request::Request(FCGX_Request *req)
 	mFcgiRequest = req;
 	mMethod      = Undef;
 
-	const char *u = FCGX_GetParam("QUERY_STRING", req->envp);
-	if (u)
-	{
-		std::string qs(u);
-		mUri.push_back( qs );
+	try {
+		String qs = getParam("QUERY_STRING");
+		if ( ! qs.isEmpty() )
+			mUri.push_back( qs );
+	} catch (...) {
+		mUri.clear();
 	}
 }
 
@@ -72,43 +73,60 @@ unsigned int Request::countUriArgs(void)
  * @param allowEmpty Boolean to aloow (or not) empty result
  * @return string Value of the cookie
  */
-std::string Request::getCookieByName(const std::string &name, bool allowEmpty = false)
+String Request::getCookieByName(const String &name, bool allowEmpty = false)
 {
-	std::string value("");
+	String value;
 
 	try {
-		const char *c = FCGX_GetParam("HTTP_COOKIE", mFcgiRequest->envp);
-		if (c == 0)
+		String hc = getParam("HTTP_COOKIE");
+		if (hc.isEmpty())
 			throw runtime_error("No Cookie available");
-		std::string qs(c);
 
-		std::size_t pos = 0;
-		while(1)
+		int pos = 0;
+		while(pos >= 0)
 		{
-			pos = qs.find(";", pos);
-			std::string cookie = qs.substr(0, pos);
+			String cookie;
 
-			std::size_t sep = cookie.find("=");
-			if (sep == std::string::npos)
-				continue;
-			std::string cName  = cookie.substr(0, sep);
-			std::string cValue = cookie.substr(sep + 1, std::string::npos);
+			int startPos = pos;
+			// Find the next cookie separator (if any)
+			pos = hc.indexOf(';', pos);
+			// Extract one cookie from list
+			if (pos >= 0)
+				cookie = hc.mid(startPos, pos - startPos);
+			else
+				cookie = hc.right(hc.length() - startPos);
 
-			if ( ! cName.compare(name) )
+			String cName;
+			String cValue;
+
+			// Find the name/value separator
+			int vSep = cookie.indexOf('=');
+			if (vSep >= 0)
+			{
+				// Extract cookie name
+				cName  = cookie.left(vSep);
+				if (cName[0] == ' ')
+					cName.remove(0, 1);
+				// Extract cookie value
+				vSep++;
+				cValue = cookie.right(cookie.length() - vSep);
+			}
+
+			if (cName == name)
 			{
 				value = cValue;
 				break;
 			}
 
-			if (pos == std::string::npos)
-				break;
+			if (pos >= 0)
+				pos++;
 		}
 	} catch (std::exception &e) {
 		Log::debug() << "Request::getCookieByName " << name;
 		Log::debug() << " : " << e.what() << Log::endl;
 	}
 
-	if ( value.empty() && (allowEmpty == false) )
+	if ( value.isEmpty() && (allowEmpty == false) )
 		throw runtime_error("Not Found");
 
 	return value;
@@ -199,9 +217,9 @@ String Request::getFormValue(const String &name)
  * @param n Position of the requested argument (0 for URI hitself)
  * @return string Value of the argument, or the URI
  */
-std::string Request::getUri(unsigned int n = 0)
+String Request::getUri(unsigned int n = 0)
 {
-	std::string uri;
+	String uri;
 	
 	if (n < mUri.size())
 		uri = mUri.at(n);
@@ -336,27 +354,50 @@ void Request::loadFormInputs(void)
  *
  * @param route Reference to the route URI
  */
-void Request::setUri(const std::string &route)
+void Request::setUri(const String &route)
 {
 	if (mUri.size() == 0)
 		return;
 	
-	// Get full URI string
-	std::string args = getParam("QUERY_STRING");
-	// Keep only the tail (where args are)
-	args.erase(0, route.length());
-	if (args.length())
-	{
-		if (args[0] == '/')
-			args.erase(0, 1);
+	try {
+		// Get full URI string
+		String args = getParam("QUERY_STRING");
+		if (args.isEmpty())
+			throw runtime_error("Query string empty (or not found)");
+		// Keep only the tail (where args are)
+		args.remove(0, route.length());
+		if (args.length())
+		{
+			if (args[0] == '/')
+				args.remove(0, 1);
+		}
+
+		// Clear the current URI argument array
+		mUri.clear();
+		// Set the requested route as arg(0)
+		mUri.push_back(route);
+
+		for (int pos = 0; pos >= 0; )
+		{
+			String token;
+			int start = pos;
+			pos = args.indexOf('/', pos);
+			if (pos >= 0)
+			{
+				token = args.mid(start, pos - start);
+				pos++;
+			}
+			else
+			{
+				token = args.right(args.length() - start);
+			}
+			mUri.push_back(token);
+		}
+
+	} catch (std::exception &e) {
+		Log::error() << "setUri failed "
+		             << e.what() << Log::endl;
 	}
-	
-	mUri.clear();
-	mUri.push_back(route);
-	
-	std::istringstream qs( args );
-	for(std::string token; getline(qs, token, '/'); )
-		mUri.push_back(token);
 }
 
 } // namespace hermod

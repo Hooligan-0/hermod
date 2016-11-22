@@ -57,7 +57,7 @@ Page::~Page(void)
  */
 String Page::getArg(int n)
 {
-	return String( mRequest->getUri(n) );
+	return mRequest->getUri(n);
 }
 
 /**
@@ -208,8 +208,8 @@ void Page::loadSession(int mode)
 			// If this parameter is absent
 			if (cookieName.isEmpty())
 				cookieName = "HERMOD_SESSION";
-			std::string sessId = mRequest->getCookieByName(cookieName, false);
-			sess = sc->getById(sessId);
+			String sessId = mRequest->getCookieByName(cookieName, false);
+			sess = sc->getById(sessId.toStdStr());
 			if (sess == 0)
 			{
 				Log::debug() << "Page: try to load an unknown session " << sessId << Log::endl;
