@@ -23,6 +23,14 @@ namespace hermod {
 class Module;
 class Page;
 
+/**
+ * @class RouteTarget
+ * @brief This class is used to identify a page into a module
+ *
+ * The Router subsystem map a list of known URL to a list of "targets" that
+ * known how to process the request. This class is used to define this targets
+ * as a "page" managed by a "module".
+ */
 class RouteTarget
 {
 public:
