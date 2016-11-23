@@ -15,8 +15,8 @@
 #ifndef ROUTETARGET_HPP
 #define ROUTETARGET_HPP
 
-#include <string>
 #include <vector>
+#include "String.hpp"
 
 namespace hermod {
 
@@ -31,16 +31,16 @@ public:
 	void    enable(void);
 	bool    isEnabled(void);
 	Module *getModule(void);
-	const std::string &getName(void);
-	void setModule(Module *module);
-	void setName  (const std::string &name);
+	const String &getName(void);
+	void    setModule(Module *module);
+	void    setName  (const String &name);
 	// Handle Pages
 	Page   *newPage (void);
 	void    freePage(Page *page);
 private:
-	bool         mValid;
-	std::string  mName;
-	Module      *mModule;
+	bool    mValid;
+	String  mName;
+	Module *mModule;
 };
 
 } // namespace hermod

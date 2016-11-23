@@ -15,6 +15,7 @@
 #include "RouteTarget.hpp"
 #include "Module.hpp"
 #include "Page.hpp"
+#include "String.hpp"
 
 namespace hermod {
 
@@ -49,7 +50,7 @@ Module *RouteTarget::getModule(void)
 	return mModule;
 }
 
-const std::string &RouteTarget::getName(void)
+const String &RouteTarget::getName(void)
 {
 	return mName;
 }
@@ -64,7 +65,7 @@ Page *RouteTarget::newPage(void)
 	// Sanity check
 	if (mModule == NULL)
 		return NULL;
-	if (mName.empty())
+	if (mName.isEmpty())
 		return NULL;
 	
 	return mModule->newPage(mName);
@@ -75,7 +76,7 @@ void RouteTarget::setModule(Module *module)
 	mModule = module;
 }
 
-void RouteTarget::setName(const std::string &name)
+void RouteTarget::setName(const String &name)
 {
 	mName = name;
 }
