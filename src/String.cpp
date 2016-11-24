@@ -405,7 +405,7 @@ int String::lastIndexOf(char c, int from) const
  * @param n Number of characters to get
  * @return String A new string with a copy of 'n' characters
  */
-String String::left(unsigned int n)
+String String::left(unsigned int n) const
 {
 	String subString;
 
@@ -440,7 +440,7 @@ size_t String::length(void) const
  * @param n   Number of characters to get
  * @return String A new string with a copy of 'n' bytes
  */
-String String::mid(int pos, int n)
+String String::mid(int pos, int n) const
 {
 	String result;
 
@@ -563,7 +563,7 @@ void String::reserve(unsigned int size)
  * @param n Number of characters to get
  * @return String A new string with a copy of the last 'n' characters
  */
-String String::right(unsigned int n)
+String String::right(unsigned int n) const
 {
 	String subString;
 

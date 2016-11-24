@@ -42,12 +42,12 @@ public:
 	int         indexOf  (char c, int from = 0) const;
 	bool        isEmpty  (void) const;
 	int         lastIndexOf(char c, int from = -1) const;
-	String      left     (unsigned int n);
+	String      left     (unsigned int n) const;
 	size_t      length   (void) const;
-	String      mid      (int pos, int n = -1);
+	String      mid      (int pos, int n = -1) const;
 	String     &remove   (int pos, int n);
 	void        reserve  (unsigned int size);
-	String      right    (unsigned int n);
+	String      right    (unsigned int n) const;
 	size_t      size     (void) const;
 	String      toBase64 (void) const;
 	std::string toStdStr (void) const;
