@@ -18,6 +18,7 @@
 #include <vector>
 #include "Config.hpp"
 #include "RouteTarget.hpp"
+#include "String.hpp"
 
 namespace hermod {
 
@@ -36,12 +37,12 @@ public:
 	~Router();
 	RouteTarget *createTarget(Module *module);
 	void removeTarget(RouteTarget *target);
-	RouteTarget *find(const std::string &uri);
+	RouteTarget *find(const String &uri);
 	RouteTarget *find(Request *r);
 protected:
-	ConfigKey   *findConfigRoute(const std::string &uri);
-	RouteTarget *findTarget(const std::string &module, const std::string &page);
-	RouteTarget *findTarget(const std::string &pair);
+	ConfigKey   *findConfigRoute(const String &uri);
+	RouteTarget *findTarget(const String &module, const String &page);
+	RouteTarget *findTarget(const String &pair);
 private:
 	std::vector<RouteTarget *> mTargets;
 };

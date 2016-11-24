@@ -35,6 +35,7 @@ Router::Router(void)
  */
 Router::~Router()
 {
+	// Clear the target cache
 	while(mTargets.size())
 	{
 		RouteTarget *target = mTargets.back();
@@ -64,12 +65,12 @@ RouteTarget *Router::createTarget(Module *module)
  * @param uri Reference to the URI (or name) to find
  * @return RouteTarget* Pointer to a route if URI is found
  */
-RouteTarget *Router::find(const std::string &uri)
+RouteTarget *Router::find(const String &uri)
 {
 	RouteTarget *target = 0;
 
 	try {
-		ConfigKey *cfgRoute = this->findConfigRoute(uri);
+		ConfigKey *cfgRoute = findConfigRoute(uri);
 		// If no valid route found :( Nothing more to do
 		if (cfgRoute == 0)
 			return NULL;
@@ -97,21 +98,21 @@ RouteTarget *Router::find(const std::string &uri)
  */
 RouteTarget *Router::find(Request *r)
 {
-	std::string uri = r->getUri(0);
-	if (uri.empty())
+	String uri = r->getUri(0);
+	if (uri.isEmpty())
 		uri = ":index:";
 	
 	RouteTarget *target;
 
 	try {
 		// Find the route into config
-		ConfigKey *cfgRoute = this->findConfigRoute(uri);
+		ConfigKey *cfgRoute = findConfigRoute(uri);
 		// If no route found, end
 		if (cfgRoute == 0)
 			return 0;
 
 		// Find a target for this route
-		target = this->findTarget(cfgRoute->getValue());
+		target = findTarget(cfgRoute->getValue());
 		// If a valid target has been found
 		if (target)
 			// Update Request URI and args
@@ -136,7 +137,7 @@ RouteTarget *Router::find(Request *r)
  * @param uri String of the requested URI or system name
  * @return ConfigKey* Pointer to the config key (or NULL)
  */
-ConfigKey *Router::findConfigRoute(const std::string &uri)
+ConfigKey *Router::findConfigRoute(const String &uri)
 {
 	Config    *cfg = Config::getInstance();
 	ConfigKey *key = 0;
@@ -148,8 +149,8 @@ ConfigKey *Router::findConfigRoute(const std::string &uri)
 			if (key == 0)
 				break;
 			
-			std::string routeUri = key->getName();
-			if ( uri.compare(0, routeUri.size(), routeUri) == 0)
+			String routeUri = key->getName();
+			if (routeUri == uri.left(routeUri.length()) )
 				break;
 		}
 	} catch (std::exception &e) {
@@ -166,8 +167,8 @@ ConfigKey *Router::findConfigRoute(const std::string &uri)
  * @param page   String of the page name
  * @return RouteTarget* Pointer to the target that define the requested page
  */
-RouteTarget *Router::findTarget(const std::string &module,
-                                const std::string &page)
+RouteTarget *Router::findTarget(const String &module,
+                                const String &page)
 {
 	RouteTarget *target = 0;
 	try {
@@ -202,18 +203,18 @@ RouteTarget *Router::findTarget(const std::string &module,
  * @param pair String of the "module:page" request
  * @return RouteTarget* Pointer to the target that define the requested page
  */
-RouteTarget *Router::findTarget(const std::string &pair)
+RouteTarget *Router::findTarget(const String &pair)
 {
 	RouteTarget *target = 0;
 	try {
 		// Split rule string to find module name and page name
-		std::size_t sepPos = pair.find(':');
-		if (sepPos == std::string::npos)
+		int sepPos = pair.indexOf(':');
+		if (sepPos < 0)
 			throw std::runtime_error("Malformed target pair name");
 		// Extract name of the module from rule
-		std::string modName  = pair.substr(0, sepPos);
+		String modName  = pair.left(sepPos);
 		// Extract name of the page from rule
-		std::string pageName = pair.substr(sepPos + 1, std::string::npos);
+		String pageName = pair.right(pair.length() - sepPos - 1);
 
 		target = this->findTarget(modName, pageName);
 
