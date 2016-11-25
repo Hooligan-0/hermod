@@ -28,7 +28,7 @@ public:
 	ModDummy();
 	void   freePage(Page *page);
 	void   initRouter(Router *router);
-	Page  *newPage(const std::string &name);
+	Page  *newPage(const String &name);
 };
 
 	} // namespace Dummy

@@ -14,8 +14,9 @@
  */
 #ifndef MODULECACHE_HPP
 #define MODULECACHE_HPP
-#include "Module.hpp"
 #include <vector>
+#include "Module.hpp"
+#include "String.hpp"
 
 namespace hermod {
 
@@ -30,9 +31,9 @@ public:
 	ModuleCache();
 	~ModuleCache();
 	void    clear(void);
-	Module *find (const std::string &name);
-	Module *load (const std::string &name);
-	void     unload(int );
+	Module *find (const String &name);
+	Module *load (const String &name);
+	void    unload(int );
 private:
 	std::vector<Module *> mModules;
 };

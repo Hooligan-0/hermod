@@ -51,14 +51,14 @@ void ModuleCache::clear(void)
  *
  * @return Module* Pointer to the module object (or NULL)
  */
-Module *ModuleCache::find(const std::string &name)
+Module *ModuleCache::find(const String &name)
 {
 	Module *module = 0;
 	
 	std::vector<Module *>::iterator it;
 	for (it = mModules.begin(); it != mModules.end(); ++it)
 	{
-		if (name.compare( (*it)->getName() ) == 0)
+		if (name == (*it)->getName())
 		{
 			module = *it;
 			break;
@@ -68,14 +68,14 @@ Module *ModuleCache::find(const std::string &name)
 	return module;
 }
 
-Module * ModuleCache::load(const std::string &name)
+Module * ModuleCache::load(const String &name)
 {
 	Config *cfg = Config::getInstance();
 	
-	std::string fullname = cfg->get("plugins", "directory");
+	String fullname = cfg->get("plugins", "directory");
 	fullname += name;
 	
-	void *handle = dlopen(fullname.c_str(), RTLD_NOW|RTLD_GLOBAL);
+	void *handle = dlopen(fullname.data(), RTLD_NOW|RTLD_GLOBAL);
 	if (handle == 0)
 	{
 		Log::warning() << "Load module " << name << " ";

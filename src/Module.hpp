@@ -15,9 +15,7 @@
 #ifndef MODULE_HPP
 #define MODULE_HPP
 
-#include <string>
-
-using namespace std;
+#include "String.hpp"
 
 namespace hermod {
 
@@ -34,20 +32,20 @@ class Module
 public:
 	explicit Module(ModuleCache *cache = 0);
 	void  *getHandle(void);
-	string getName(void);
+	String getName(void);
 	void   setCache (ModuleCache *cache);
 	void   setHandle(void *handle);
-	void   setName(const std::string &name);
+	void   setName(const String &name);
 public:
 	virtual void  initRouter(Router *router);
-	virtual Page *newPage (const std::string &name);
+	virtual Page *newPage (const String &name);
 	virtual void  freePage(Page *page);
 
 protected:
 	ModuleCache *getCache(void);
 protected:
-	void *mHandle;
-	std::string mName;
+	void  *mHandle;
+	String mName;
 	ModuleCache *mModules;
 };
 

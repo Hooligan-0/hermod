@@ -69,15 +69,15 @@ void ModDummy::initRouter(Router *router)
 	tgt->enable();
 }
 
-Page *ModDummy::newPage(const std::string &name)
+Page *ModDummy::newPage(const String &name)
 {
 	Page *page = NULL;
 	
-	if (name.compare("err_404") == 0)
+	if (name == "err_404")
 		page = new Page404();
-	else if (name.compare("hello") == 0)
+	else if (name == "hello")
 		page = new PageHello();
-	else if (name.compare("hello_json") == 0)
+	else if (name == "hello_json")
 		page = new PageHelloJson();
 	
 	return page;

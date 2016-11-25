@@ -12,9 +12,8 @@
  *
  * Authors: Saint-Genest Gwenael <gwen@hooligan0.net>
  */
-#include <iostream>
-#include <string>
 #include "Module.hpp"
+#include "Log.hpp"
 #include "Router.hpp"
 #include "Page.hpp"
 
@@ -69,9 +68,9 @@ void *Module::getHandle(void)
  * value is mainly used into config file to link one (or more) route to a page
  * exposed by this module.
  *
- * @return string Name of the module
+ * @return String Name of the module
  */
-std::string Module::getName(void)
+String Module::getName(void)
 {
 	return mName;
 }
@@ -104,26 +103,70 @@ void Module::setHandle(void *handle)
  *
  * @param name String contains the name of the module
  */
-void Module::setName(const std::string &name)
+void Module::setName(const String &name)
 {
 	mName = name;
 }
 
 // ---------- Below, virtual methods used to specify Module interface ----------
 
+/**
+ * @brief Free a page previously allocated by newPage
+ *
+ * When a module register pages (see RouterTarget) this module must contains
+ * two methods to allocate and free them. If the module does not expose any
+ * page, this method may not be overloaded.
+ *
+ * @param page Pointer to the page to free
+ */
 void Module::freePage(Page *page)
 {
 	(void)page;
+
+	// This default method should *never* be used. If a page is allocated
+	// by a module, the freePage() method must be overloaded !!
+
+	// Log this error !
+	Log::error() << "Module ";
+	if ( ! mName.isEmpty() )
+		Log::error() << mName;
+	else
+		Log::error() << "<unknown>";
+	Log::error() << " freePage not implemented." << Log::endl;
 }
 
+/**
+ * @brief Called after module loading to allow this module to configure router
+ *
+ * When a module contains Pages, they must ne registered them into router as
+ * targets. After module loading, this method is called to inform the module
+ * of available router(s). If the module does not expose page, this method may
+ * not be overloaded.
+ *
+ * @param router Pointer to an active Router
+ */
 void Module::initRouter(Router *router)
 {
 	(void)router;
 }
 
-Page *Module::newPage(const std::string &name)
+/**
+ * @brief Allocate a new Page
+ *
+ * @param  name  Name of the page model to allocate
+ * @return Page* Pointer to the newly allocated Page
+ */
+Page *Module::newPage(const String &name)
 {
 	(void)name;
+
+	Log::warning() << "Module ";
+	if ( ! mName.isEmpty() )
+		Log::warning() << mName;
+	else
+		Log::warning() << "<unknown>";
+	Log::warning() << " failed to allocate a new Page: not implemented." << Log::endl;
+
 	return NULL;
 }
 
