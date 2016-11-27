@@ -1,5 +1,5 @@
 
-BUILD_DIR=./hermod_0.3.0_dev
+BUILD_DIR=./hermod_0.3.1_dev
 
 CP=cp -a
 MAKE=make
@@ -33,6 +33,8 @@ install:
 	dpkg -i $(BUILD_DIR).deb
 
 clean:
-	rm -f $(BUILD_DIR).deb
-	rm -rf $(BUILD_DIR)
-	rm -f *~ config/*~ DEBIAN/*~
+	@echo " * Remove package file and build dir $(BUILD_DIR)"
+	@rm -f $(BUILD_DIR).deb
+	@rm -rf $(BUILD_DIR)
+	@echo " * Remove temporary files ( *~ )"
+	@rm -f *~ config/*~ DEBIAN/*~
