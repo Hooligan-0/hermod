@@ -178,7 +178,7 @@ void Page::initSession(int mode)
 			Log::debug() << "Page::initSession create session " << sess->getId() << Log::endl;
 			if (mode == 1)
 			{
-				std::string cookie( cookieName );
+				String cookie( cookieName );
 				cookie += "=" + sess->getId();
 				mResponse->header()->addHeader("Set-Cookie", cookie);
 				Log::debug() << "Page: create session " << sess->getId() << Log::endl;

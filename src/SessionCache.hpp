@@ -14,8 +14,8 @@
  */
 #ifndef SESSIONCACHE_HPP
 #define SESSIONCACHE_HPP
-#include <string>
 #include <vector>
+#include "String.hpp"
 
 namespace hermod {
 
@@ -33,7 +33,7 @@ public:
 	static SessionCache* getInstance();
 public:
 	Session *create (void);
-	Session *getById(const std::string &id);
+	Session *getById(const String &id);
 private:
 	SessionCache();
 	static SessionCache   *mInstance;

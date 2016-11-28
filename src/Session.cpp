@@ -14,8 +14,8 @@
  */
 #include <cstdlib>
 #include <iostream>
-#include <vector>
 #include <string>
+#include <vector>
 #include <sstream>
 #include <fstream>
 #include <stdexcept>
@@ -45,9 +45,9 @@ Session::Session()
  */
 void Session::clearFileKey(void)
 {
-	for( map<string,string>::iterator ii=mCache.begin(); ii!=mCache.end(); ++ii)
+	for( map<String,String>::iterator ii=mCache.begin(); ii!=mCache.end(); ++ii)
 	{
-		if ( (*ii).first.compare(0, 4, "key_") == 0)
+		if ( (*ii).first.left(4) == "key_" )
 		{
 			mCache.erase(ii);
 			ii=mCache.begin();
@@ -63,15 +63,13 @@ void Session::clearFileKey(void)
  */
 void Session::create(void)
 {
-	ostringstream convert;
+	// Get a random integer using standard rand
 	int rndKeyId = std::rand();
-	string rndKey;
-	
-	convert << rndKeyId;
-	rndKey = convert.str();
+	// Convert this value to string
+	String rndKey = String::number(rndKeyId);
 	
 	Config  *cfg = Config::getInstance();
-	mFilename  = cfg->get("global", "path_session").toStdStr();
+	mFilename  = cfg->get("global", "path_session");
 	mFilename += "hermod-session-" + rndKey;
 	
 	// Save key to the cache
@@ -87,22 +85,22 @@ void Session::create(void)
  *
  * @param key Id of the session to load
  */
-void Session::load(string key)
+void Session::load(String sessId)
 {
 	struct stat buffer;
-	string sessionfile;
+	String sessionfile;
 
 	Config  *cfg = Config::getInstance();
-	sessionfile  = cfg->get("global", "path_session").toStdStr();
-	sessionfile += "hermod-session-" + key;
+	sessionfile  = cfg->get("global", "path_session");
+	sessionfile += "hermod-session-" + sessId;
 
-	if ( stat (sessionfile.c_str(), &buffer) )
+	if ( stat (sessionfile.data(), &buffer) )
 		return;
 
-	mKey      = key;
+	mKey      = sessId;
 	mFilename = sessionfile;
 	
-	std::ifstream sfile(mFilename.c_str());
+	std::ifstream sfile(mFilename.data());
 	std::string lineData;
 	while (getline (sfile,lineData))
 	{
@@ -111,8 +109,8 @@ void Session::load(string key)
 		if (pos == std::string::npos)
 			continue;
 		
-		std::string key = lineData.substr(0, pos);
-		std::string val = lineData.substr(pos + 2);
+		String key = lineData.substr(0, pos);
+		String val = lineData.substr(pos + 2);
 		// Save key into memory cache
 		mCache[key] = val;
 	}
@@ -120,9 +118,7 @@ void Session::load(string key)
 
 	mCount ++;
 
-	ostringstream updCount;
-	updCount << mCount;
-	mCache["COUNT"] = updCount.str();
+	mCache["COUNT"] = String::number(mCount);
 
 	mValid = true;
 	mIsNew = false;
@@ -137,12 +133,12 @@ void Session::save(void)
 	fstream sfile;
 	ostringstream dat;
 	
-	sfile.open(mFilename.c_str(), ios::out | ios::trunc);
+	sfile.open(mFilename.data(), ios::out | ios::trunc);
 	
 	if ( ! sfile.is_open())
 		throw runtime_error("Session: Could not open the file!");
 	
-	std::map<string, string>::iterator it;
+	std::map<String, String>::iterator it;
 	for (it = mCache.begin(); it != mCache.end(); ++it)
 	{
 		dat << it->first << ": " << it->second << endl;
@@ -155,9 +151,9 @@ void Session::save(void)
 /**
  * @brief Get the session ID
  *
- * @return string The session ID
+ * @return String The session ID
  */
-string Session::getId(void)
+String Session::getId(void)
 {
 	return mKey;
 }
@@ -165,19 +161,22 @@ string Session::getId(void)
 /**
  * @brief Get the value of a key, identified by his key name
  *
- * @param key Name of the key
- * @return string Value of the key as string
+ * @param  key    Name of the key
+ * @return String Value of the key as string
  */
-std::string Session::getKey(const std::string &key)
+String Session::getKey(const String &key)
 {
-	for( map<string,string>::iterator ii=mCache.begin(); ii!=mCache.end(); ++ii)
+	String result;
+
+	for( map<String,String>::iterator ii=mCache.begin(); ii!=mCache.end(); ++ii)
 	{
-		if ( (*ii).first.compare(key) == 0)
+		if ( (*ii).first == key )
 		{
-			return (*ii).second;
+			result = (*ii).second;
+			break;
 		}
 	}
-	return std::string("");
+	return result;
 }
 
 /**
@@ -186,11 +185,10 @@ std::string Session::getKey(const std::string &key)
  * @param key Name of the key
  * @return int Value of the key as integer
  */
-int Session::getKeyInt(const std::string &key)
+int Session::getKeyInt(const String &key)
 {
-	std::string strValue = getKey(key);
-	int intValue = atoi(strValue.c_str());
-	return intValue;
+	String strValue = getKey(key);
+	return strValue.toInt();
 }
 
 /**
@@ -199,7 +197,7 @@ int Session::getKeyInt(const std::string &key)
  * @param key Name of the key to update
  * @param value New value to set
  */
-void Session::setKey(const std::string &key, const std::string &value)
+void Session::setKey(const String &key, const String &value)
 {
 	mCache[ key ] = value;
 }
@@ -210,11 +208,9 @@ void Session::setKey(const std::string &key, const std::string &value)
  * @param key Name of the key to update
  * @param value New value to set (long int)
  */
-void Session::setKey(const std::string &key, unsigned long value)
+void Session::setKey(const String &key, unsigned long value)
 {
-	ostringstream temp;
-	temp << value;
-	mCache[ key ] = temp.str();
+	mCache[ key ] = String::number(value);
 }
 
 /**
@@ -222,9 +218,9 @@ void Session::setKey(const std::string &key, unsigned long value)
  *
  * @param key Name of the key to delete
  */
-void Session::removeKey(const std::string &key)
+void Session::removeKey(const String &key)
 {
-	std::map<string,string>::iterator it;
+	std::map<String,String>::iterator it;
 	it = mCache.find(key);
 	if (it != mCache.end())
 		mCache.erase (it);
@@ -234,15 +230,9 @@ void Session::removeKey(const std::string &key)
  * @brief TEMPORARY - This is a debug method used to test an authentication system
  *
  */
-void Session::auth(unsigned long id, string user)
+void Session::auth(unsigned long id, String user)
 {
-	ostringstream convertId;
-	std::string   strId;
-	
-	convertId << id;
-	strId = convertId.str();
-	
-	mCache["AuthUserId"] = strId;
+	mCache["AuthUserId"]   = String::number(id);
 	mCache["AuthUsername"] = user;
 }
 
@@ -272,9 +262,9 @@ bool Session::isValid(void)
  */
 int Session::isAuth(void)
 {
-	for( map<string,string>::iterator ii=mCache.begin(); ii!=mCache.end(); ++ii)
+	for( map<String,String>::iterator ii=mCache.begin(); ii!=mCache.end(); ++ii)
 	{
-		if ( (*ii).first.compare("AuthUsername") == 0)
+		if ( (*ii).first == "AuthUsername" )
 		{
 			return (1);
 		}

@@ -102,18 +102,18 @@ Session *SessionCache::create(void)
  * @param id The session identifier
  * @return Session* Pointer to the Session
  */
-Session *SessionCache::getById(const std::string &id)
+Session *SessionCache::getById(const String &id)
 {
 	Session *sess = NULL;
 	
 	// Sanity check
-	if (id.empty())
+	if (id.isEmpty())
 		return NULL;
 	
 	std::vector<Session *>::iterator it;
 	for (it = mCache.begin(); it != mCache.end(); ++it)
 	{
-		if (id.compare( (*it)->getId() ) == 0)
+		if (id == (*it)->getId())
 		{
 			sess = (*it);
 			break;

@@ -14,8 +14,8 @@
  */
 #ifndef SESSION_HPP
 #define SESSION_HPP
-#include <string>
 #include <map>
+#include "String.hpp"
 
 using namespace std;
 
@@ -35,17 +35,17 @@ class Session
 public:
 	Session();
 	void create(void);
-	void load(string key);
+	void load(String sessId);
 	void save(void);
-	void auth(unsigned long id, string user);
-	std::string getKey   (const std::string &key);
-	int         getKeyInt(const std::string &key);
-	void setKey(const std::string &key, const std::string &value);
-	void setKey(const std::string &key, unsigned long value);
-	void removeKey(const std::string &key);
+	void auth(unsigned long id, String user);
+	String getKey   (const String &key);
+	int    getKeyInt(const String &key);
+	void setKey(const String &key, const String &value);
+	void setKey(const String &key, unsigned long value);
+	void removeKey(const String &key);
 	void clearFileKey(void);
 public:
-	string getId  (void);
+	String getId  (void);
 	bool   isNew  (void);
 	bool   isValid(void);
 	int    isAuth (void);
@@ -53,9 +53,9 @@ private:
 	int    mCount;
 	bool   mIsNew;
 	bool   mValid;
-	string mKey;
-	string mFilename;
-	std::map <string, string> mCache;
+	String mKey;
+	String mFilename;
+	std::map <String, String> mCache;
 };
 } // namespace hermod
 #endif
