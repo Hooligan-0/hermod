@@ -14,12 +14,15 @@
  */
 #ifndef SESSION_HPP
 #define SESSION_HPP
+#include <ctime>
 #include <map>
 #include "String.hpp"
 
 using namespace std;
 
 namespace hermod {
+
+#define TTL_DEFAULT 120
 
 /**
  * @class Session
@@ -40,17 +43,24 @@ public:
 	void auth(unsigned long id, String user);
 	String getKey   (const String &key);
 	int    getKeyInt(const String &key);
+	int    getTtlLimit(void);
 	void setKey(const String &key, const String &value);
 	void setKey(const String &key, unsigned long value);
+	void   setTtlLimit(int limit);
 	void removeKey(const String &key);
 	void clearFileKey(void);
 public:
 	String getId  (void);
 	bool   isNew  (void);
+	bool   isTtlExpired(void);
 	bool   isValid(void);
 	int    isAuth (void);
+protected:
+	void   updateTtl(void);
 private:
 	int    mCount;
+	int    mTtlLimit;
+	time_t mTtlLast;
 	bool   mIsNew;
 	bool   mValid;
 	String mKey;

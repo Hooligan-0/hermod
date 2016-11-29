@@ -37,6 +37,8 @@ Session::Session()
 	mIsNew = false;
 	mValid = false;
 	mCount = 1;
+	mTtlLast  = time(0);
+	mTtlLimit = TTL_DEFAULT;
 }
 
 /**
@@ -78,6 +80,8 @@ void Session::create(void)
 	mKey = rndKey;
 	mValid = true;
 	mIsNew = true;
+	// Update the last access time
+	updateTtl();
 }
 
 /**
@@ -122,6 +126,8 @@ void Session::load(String sessId)
 
 	mValid = true;
 	mIsNew = false;
+	// Update the last access time
+	updateTtl();
 }
 
 /**
@@ -146,6 +152,8 @@ void Session::save(void)
 	sfile << dat.str();
 	sfile.flush();
 	sfile.close();
+	// Update the last access time
+	updateTtl();
 }
 
 /**
@@ -176,6 +184,9 @@ String Session::getKey(const String &key)
 			break;
 		}
 	}
+	// Update the last access time
+	updateTtl();
+
 	return result;
 }
 
@@ -192,6 +203,16 @@ int Session::getKeyInt(const String &key)
 }
 
 /**
+ * @brief Get the cache TTL
+ *
+ * @return integer Current value od TTL (in seconds)
+ */
+int Session::getTtlLimit(void)
+{
+	return mTtlLimit;
+}
+
+/**
  * @brief Set the value of a key
  *
  * @param key Name of the key to update
@@ -199,6 +220,9 @@ int Session::getKeyInt(const String &key)
  */
 void Session::setKey(const String &key, const String &value)
 {
+	// Update the last access time
+	updateTtl();
+	// Save the new value into session key
 	mCache[ key ] = value;
 }
 
@@ -210,7 +234,20 @@ void Session::setKey(const String &key, const String &value)
  */
 void Session::setKey(const String &key, unsigned long value)
 {
+	// Update the last access time
+	updateTtl();
+	// Save the new value into session key
 	mCache[ key ] = String::number(value);
+}
+
+/**
+ * @brief Set the cache TTL
+ *
+ * @param limit New TTL value
+ */
+void Session::setTtlLimit(int limit)
+{
+	mTtlLimit = limit;
 }
 
 /**
@@ -224,6 +261,8 @@ void Session::removeKey(const String &key)
 	it = mCache.find(key);
 	if (it != mCache.end())
 		mCache.erase (it);
+	// Update the last access time
+	updateTtl();
 }
 
 /**
@@ -244,6 +283,26 @@ void Session::auth(unsigned long id, String user)
 bool Session::isNew(void)
 {
 	return mIsNew;
+}
+
+/**
+ * @brief Test if the TTL of this session has expired
+ *
+ * @return boolean True if the last cache access is oldest than TTL
+ */
+bool Session::isTtlExpired(void)
+{
+	bool expired = false;
+
+	// If the limit value is negative, the TTL is unlimited
+	if (mTtlLimit < 0)
+		return false;
+
+	int elapsed = time(0) - mTtlLast;
+	if (elapsed > mTtlLimit)
+		expired = true;
+
+	return expired;
 }
 
 /**
@@ -270,6 +329,15 @@ int Session::isAuth(void)
 		}
 	}
 	return 0;
+}
+
+/**
+ * @brief Update last access time (this reset TTL)
+ *
+ */
+void Session::updateTtl(void)
+{
+	mTtlLast = time(0);
 }
 
 } // namespace hermod
