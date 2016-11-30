@@ -76,6 +76,35 @@ SessionCache::SessionCache()
 }
 
 /**
+ * @brief Clean the cache (delete sessions with expired TTL)
+ *
+ */
+void SessionCache::clean(void)
+{
+	// If no cache available ... nothing to do
+	if (mInstance == 0)
+		return;
+
+	// Test all cache items
+	std::vector<Session *>::iterator it = mInstance->mCache.begin();
+	while (it != mInstance->mCache.end())
+	{
+		// Get the next session from cache
+		Session *sess = (*it);
+		// Test if the TTL is expired
+		if (sess->isTtlExpired())
+		{
+			// Delete the session, and remode it from cache
+			sess->drop();
+			mInstance->mCache.erase(it);
+			it = mInstance->mCache.begin();
+		}
+		else
+			++it;
+	}
+}
+
+/**
  * @brief Create a new session
  *
  * @return Session* Pointer to the newly created Session

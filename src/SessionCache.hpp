@@ -31,6 +31,7 @@ class SessionCache
 public:
 	static void destroy();
 	static SessionCache* getInstance();
+	static void clean(void);
 public:
 	Session *create (void);
 	Session *getById(const String &id);

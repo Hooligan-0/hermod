@@ -124,7 +124,7 @@ App* App::exec(void)
 			FD_ZERO(&rfds);
 			FD_SET(mFcgxSock, &rfds);
 
-			tv.tv_sec = 1;
+			tv.tv_sec = 5;
 			tv.tv_usec = 0;
 			retval = select(mFcgxSock+1, &rfds, NULL, NULL, &tv);
 			if (retval > 0)
@@ -135,6 +135,7 @@ App* App::exec(void)
 			else if (retval == 0)
 			{
 				// Case of timeout reserved for future use
+				SessionCache::clean();
 				continue;
 			}
 
