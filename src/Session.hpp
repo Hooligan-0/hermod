@@ -37,18 +37,19 @@ class Session
 {
 public:
 	Session();
-	void create(void);
-	void load(String sessId);
-	void save(void);
+	void   create(void);
+	bool   drop(void);
+	void   load(String sessId);
+	void   save(void);
 	void auth(unsigned long id, String user);
 	String getKey   (const String &key);
 	int    getKeyInt(const String &key);
 	int    getTtlLimit(void);
-	void setKey(const String &key, const String &value);
-	void setKey(const String &key, unsigned long value);
+	void   setKey(const String &key, const String &value);
+	void   setKey(const String &key, unsigned long value);
 	void   setTtlLimit(int limit);
-	void removeKey(const String &key);
-	void clearFileKey(void);
+	void   removeKey(const String &key);
+	void   clearFileKey(void);
 public:
 	String getId  (void);
 	bool   isNew  (void);

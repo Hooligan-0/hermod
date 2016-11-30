@@ -21,6 +21,7 @@
 #include <stdexcept>
 #include <sys/stat.h>
 #include "Config.hpp"
+#include "Log.hpp"
 #include "Session.hpp"
 
 using namespace std;
@@ -82,6 +83,40 @@ void Session::create(void)
 	mIsNew = true;
 	// Update the last access time
 	updateTtl();
+}
+
+/**
+ * @brief Delete the session
+ *
+ * @return boolean Return true if the session is successfully deleted
+ */
+bool Session::drop(void)
+{
+	struct stat buffer;
+
+	// If the current session if not valid ... nothing to do
+	if ( ! mValid)
+		return false;
+	// Sanity check
+	if (mFilename.isEmpty())
+		return false;
+
+	// Test if the session has been saved into a file
+	if (stat(mFilename.data(), &buffer) == 0)
+	{
+		// File exists ... delete it
+		if ( remove(mFilename.data()) )
+			Log::error() << "Failed to delete session file" << Log::endl;
+	}
+
+	// Mark the current session as invalid
+	mValid = false;
+	// Clear the current content
+	mCache.clear();
+	mFilename.clear();
+	mKey.clear();
+
+	return true;
 }
 
 /**
