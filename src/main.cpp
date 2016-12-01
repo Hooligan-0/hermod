@@ -76,7 +76,7 @@ static void config(int argc, char **argv)
 			if (std::string("-c").compare(argv[i]) == 0)
 			{
 				if ( ! hasMore)
-					throw runtime_error("Missing argument for -c");
+					throw std::runtime_error("Missing argument for -c");
 				i++;
 				cfgFilename = argv[i];
 			}
