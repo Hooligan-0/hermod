@@ -300,10 +300,15 @@ bool Request::isAccept(const String &type)
 void Request::loadFormInputs(void)
 {
 	Method method = getMethod();
-	
+
 	if (method == Post)
 	{
 		String contentLength = getParam("CONTENT_LENGTH");
+		if (contentLength.isEmpty())
+		{
+			Log::error() << "Failed to load POSTed form values : CONTENT_LENGTH not found" << Log::endl;
+			return;
+		}
 		// Convert content length to a numeric value
 		int len = contentLength.toInt();
 		if (len == 0)
