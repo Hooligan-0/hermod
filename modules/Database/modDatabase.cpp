@@ -35,6 +35,10 @@ extern "C" void destroy_object(Module *module)
 
 	namespace Database {
 
+/**
+ * @brief Default constructor
+ *
+ */
 ModDatabase::ModDatabase()
   : Module()
 {
@@ -44,8 +48,13 @@ ModDatabase::ModDatabase()
 	setName("Database");
 }
 
+/**
+ * @brief Default destructor
+ *
+ */
 ModDatabase::~ModDatabase()
 {
+	// Delete all allocated "DB" objects
 	while(mCache.size())
 	{
 		DB *db = mCache.back();
@@ -54,6 +63,12 @@ ModDatabase::~ModDatabase()
 	}
 }
 
+/**
+ * @brief Get a database, identified by his name
+ *
+ * @param  name Name of the wanted database
+ * @return DB*  Pointer to the database object (or NULL if not found)
+ */
 DB *ModDatabase::get(const std::string &name)
 {
 	DB *database = 0;
@@ -118,6 +133,25 @@ DB *ModDatabase::get(const std::string &name)
 		}
 	}
 	return database;
+}
+
+/**
+ * @brief Remove (free a previously allocated) database
+ *
+ * @param db Pointer to the database to remove. This pointer is invalid after this call
+ */
+void ModDatabase::remove(DB *db)
+{
+	std::vector<DB *>::iterator it;
+	for (it = mCache.begin(); it != mCache.end(); ++it)
+	{
+		if ((*it) == db)
+		{
+			mCache.erase(it);
+			delete db;
+			break;
+		}
+	}
 }
 
 	} // namespace Database

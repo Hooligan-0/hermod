@@ -31,6 +31,7 @@ public:
 	ModDatabase();
 	~ModDatabase();
 	DB *get(const std::string &name);
+	void remove(DB *db);
 private:
 	std::vector <DB *> mCache;
 };
