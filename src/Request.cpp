@@ -382,21 +382,28 @@ void Request::setUri(const String &route)
 		// Set the requested route as arg(0)
 		mUri.push_back(route);
 
-		for (int pos = 0; pos >= 0; )
+		// If the requested URI contains args after the route hitself
+		if (args.length() > 0)
 		{
-			String token;
-			int start = pos;
-			pos = args.indexOf('/', pos);
-			if (pos >= 0)
+			// Split arg string into an array of args
+			for (int pos = 0; pos >= 0; )
 			{
-				token = args.mid(start, pos - start);
-				pos++;
+				String token;
+				int start = pos;
+				// Find the next token separator
+				pos = args.indexOf('/', pos);
+				if (pos >= 0)
+				{
+					token = args.mid(start, pos - start);
+					pos++;
+				}
+				else
+				{
+					token = args.right(args.length() - start);
+				}
+				// Save the item
+				mUri.push_back(token);
 			}
-			else
-			{
-				token = args.right(args.length() - start);
-			}
-			mUri.push_back(token);
 		}
 
 	} catch (std::exception &e) {
