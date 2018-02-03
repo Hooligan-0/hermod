@@ -1,7 +1,7 @@
 /*
  * Hermod - Modular application framework
  *
- * Copyright (c) 2016 Cowlab
+ * Copyright (c) 2016-2018 Cowlab
  *
  * Hermod is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License 
@@ -22,7 +22,7 @@ using namespace std;
 
 namespace hermod {
 
-#define TTL_DEFAULT 120
+#define TTL_DEFAULT 300
 
 /**
  * @class Session

@@ -1,7 +1,7 @@
 /*
  * Hermod - Modular application framework
  *
- * Copyright (c) 2016 Cowlab
+ * Copyright (c) 2016-2018 Cowlab
  *
  * Hermod is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License 
@@ -12,6 +12,7 @@
  *
  * Authors: Saint-Genest Gwenael <gwen@hooligan0.net>
  */
+#include "Config.hpp"
 #include "SessionCache.hpp"
 #include "Session.hpp"
 
@@ -115,6 +116,21 @@ Session *SessionCache::create(void)
 	Session *sess = new Session();
 	// Then, use object itself to create a context
 	sess->create();
+
+	// Check if the session TTL is overloaded by config
+	Config *cfg = Config::getInstance();
+	if ( ! cfg->get("global", "session_ttl").isEmpty())
+	{
+		// Get the TTL value from config
+		String cfgTtl = cfg->get("global", "session_ttl");
+		int ttl = cfgTtl.toInt();
+		// If a positive is defined, use it
+		if (ttl > 0)
+			sess->setTtlLimit(ttl);
+		// If a nul (or negative) value is defined, set infinite TTL
+		else
+			sess->setTtlLimit(-1);
+	}
 	
 	// Insert this new session into local cache
 	mCache.push_back(sess);
