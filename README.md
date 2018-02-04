@@ -12,3 +12,18 @@ be seen as a framework or as an application server.
 * [Hermod configuration file](doc/config_file.md)
 
 * [How to use nginx as frontend](doc/nginx.md)
+
+## Changelog ##
+
+* v0.2 First working alpha version
+
+  * Add class to handle HTML ans JSON contents (response)
+  * Improve Router to allow module to register their targets
+  * Improve the Session subsystem. Now can work without cookie (use
+  application based token)
+  * Improve String class to offer high-level string manipulation methods
+
+* v0.1 Project kickoff (concept testing)
+
+The goal of this first version was to test the concept of a modular C++ web
+application server. Based on GNU cgicc.
