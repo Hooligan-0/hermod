@@ -79,6 +79,7 @@ int main(int argc, char **argv)
 static int config(int argc, char **argv)
 {
 	std::string cfgFilename(DEF_CFG_FILE);
+	std::string pluginsDir(DEF_DIR_PLUGINS);
 	bool cfgDaemon = true;
 
 	try {
@@ -93,14 +94,26 @@ static int config(int argc, char **argv)
 				i++;
 				cfgFilename = argv[i];
 			}
-			// -f : strat foreground (do not daemonize)
-			if (std::string("-f").compare(argv[i]) == 0)
+			// -f : start foreground (do not daemonize)
+			else if (std::string("-f").compare(argv[i]) == 0)
 			{
 				cfgDaemon = false;
 			}
+			// -pdir : specify the directory where plugins are stored
+			else if (std::string("-pdir").compare(argv[i]) == 0)
+			{
+				if ( ! hasMore)
+					throw std::runtime_error("Missing argument for -pdir");
+				i++;
+				pluginsDir = argv[i];
+			}
 			// --help : Only display help
-			if (std::string("--help").compare(argv[i]) == 0)
+			else if (std::string("--help").compare(argv[i]) == 0)
 				return(1);
+			else
+			{
+				std::cerr << "Unknown argument " << argv[i] << std::endl;
+			}
 		}
 	} catch (std::exception &e) {
 		std::cerr << e.what() << std::endl;
@@ -125,7 +138,7 @@ static int config(int argc, char **argv)
 	if ( cfg->get("global", "session_mode").isEmpty() )
 		cfg->set("global", "session_mode", "cookie");
 	if ( cfg->get("plugins", "directory").isEmpty() )
-		cfg->set("plugins", "directory", DEF_DIR_PLUGINS);
+		cfg->set("plugins", "directory", pluginsDir);
 	// If the "-f" flag is set, this value override config
 	if ( cfgDaemon == false )
 		cfg->set("global", "daemon", "no");
