@@ -1,7 +1,7 @@
 /*
  * Hermod - Modular application framework
  *
- * Copyright (c) 2016 Cowlab
+ * Copyright (c) 2016-2018 Cowlab
  *
  * Hermod is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License 
@@ -25,8 +25,9 @@
 
 using namespace hermod;
 
-static void config(int argc, char **argv);
+static int  config(int argc, char **argv);
 static void daemonize(void);
+static void help(void);
 static void signal_handler(int sig);
 
 /**
@@ -38,8 +39,19 @@ static void signal_handler(int sig);
 int main(int argc, char **argv)
 {
 	struct sigaction sa;
+	int ret;
 
-	config(argc, argv);
+	ret = config(argc, argv);
+	if (ret < 0)
+		return(-1);
+	else if (ret > 0)
+	{
+		if (ret == 1)
+		{
+			help();
+			return(0);
+		}
+	}
 
 	daemonize();
 
@@ -62,8 +74,9 @@ int main(int argc, char **argv)
  *
  * @param argc Number of arguments from command line
  * @param argv Array of arguments
+ * @return integer If success a nul value is returned, negative value for error, positive value for special events
  */
-static void config(int argc, char **argv)
+static int config(int argc, char **argv)
 {
 	std::string cfgFilename(DEF_CFG_FILE);
 	bool cfgDaemon = true;
@@ -85,10 +98,13 @@ static void config(int argc, char **argv)
 			{
 				cfgDaemon = false;
 			}
+			// --help : Only display help
+			if (std::string("--help").compare(argv[i]) == 0)
+				return(1);
 		}
 	} catch (std::exception &e) {
 		std::cerr << e.what() << std::endl;
-		exit(-1);
+		return(-1);
 	}
 
 	Config *cfg = Config::getInstance();
@@ -116,6 +132,8 @@ static void config(int argc, char **argv)
 	// Else, if no no value has been readed for "daemon", set true
 	else if ( cfg->get("global", "daemon").isEmpty() )
 		cfg->set("global", "daemon", "yes");
+
+	return(0);
 }
 
 /**
@@ -161,6 +179,23 @@ static void daemonize(void)
 	close(1);
 	close(2);
 	return;
+}
+
+/**
+ * @brief Write on console a message to help using hermod
+ *
+ */
+static void help(void)
+{
+	std::cout << "Usage: hermod [options]" << std::endl;
+	std::cout << "Options:" << std::endl;
+	std::cout << "  -c <file> Load configuration from a specific file" << std::endl;
+	std::cout << "  -f        Run in foreground" << std::endl;
+	std::cout << "  --help    Display this information" << std::endl;
+	std::cout << std::endl;
+	std::cout << "Version: 0.2" << std::endl;
+	std::cout << "Copyright (C) 2016-2018 Cowlab" << std::endl;
+	std::cout << "License: GNU LGPL version 3 <https://www.gnu.org/licenses/lgpl-3.0.html>" << std::endl;
 }
 
 /**
