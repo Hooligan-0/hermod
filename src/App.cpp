@@ -17,7 +17,6 @@
 #include <iostream>
 #include <stdexcept>
 #include <string>
-#include <fcgios.h> // OS_IpcClose()
 
 #include "App.hpp"
 #include "Config.hpp"
@@ -26,12 +25,7 @@
 #include "Response.hpp"
 #include "Router.hpp"
 #include "SessionCache.hpp"
-
-// Call to OS_LibShutdown() is needed to avoid fcgi leak
-extern "C"
-{
-void OS_LibShutdown(void);
-}
+#include "ServerLibFcgi.hpp"
 
 namespace hermod {
 
@@ -44,8 +38,8 @@ App*  App::mAppInstance = NULL;
 App::App()
 {
 	mRunning  = false;
-	mFcgxSock = -1;
 	mRouter   = NULL;
+	mServer   = NULL;
 }
 
 /**
@@ -54,6 +48,11 @@ App::App()
  */
 App::~App()
 {
+	if (mServer)
+	{
+		delete mServer;
+		mServer = 0;
+	}
 }
 
 /**
@@ -74,12 +73,9 @@ void App::destroy(void)
 
 	// Clear Log layer
 	Log::destroy();
-	
-	// Close FCGI socket
-	OS_IpcClose(mAppInstance->mFcgxSock);
-	mAppInstance->mFcgxSock = -1;
-	// Free fcgi
-	OS_LibShutdown();
+
+	if (mAppInstance->mServer)
+		mAppInstance->mServer->stop();
 
 	// Delete singleton object
 	delete mAppInstance;
@@ -112,6 +108,9 @@ App* App::getInstance()
  */
 App* App::exec(void)
 {
+	if (mServer == 0)
+		throw runtime_error("APP: Failed to start (no server)");
+
 	try {
 		mRunning = true;
 
@@ -120,17 +119,19 @@ App* App::exec(void)
 			fd_set rfds;
 			struct timeval tv;
 			int retval;
+			int maxFd  = 1;
 
 			FD_ZERO(&rfds);
-			FD_SET(mFcgxSock, &rfds);
+			FD_SET(mServer->getFd(), &rfds);
+			maxFd = (mServer->getFd() + 1);
 
 			tv.tv_sec = 5;
 			tv.tv_usec = 0;
-			retval = select(mFcgxSock+1, &rfds, NULL, NULL, &tv);
+			retval = select(maxFd, &rfds, NULL, NULL, &tv);
 			if (retval > 0)
 			{
-				if (FD_ISSET(mFcgxSock, &rfds) )
-					processFcgi();
+				if (FD_ISSET(mServer->getFd(), &rfds) )
+					mServer->processFd();
 			}
 			else if (retval == 0)
 			{
@@ -204,121 +205,30 @@ App* App::init(void)
 		pos++;
 	}
 
-	// Open FCGI socket
+	// Start FCGI server
 	try {
-		std::string fcgiPort(":");
-		// Initialize library
-		FCGX_Init();
+		ServerLibFcgi *server;
+		// Create the FCGI default interface
+		server = new ServerLibFcgi();
+
 		// Define the TCP port to listen
 		ConfigKey *keyPort = cfg->getKey("global", "port");
 		if (keyPort)
-			fcgiPort += keyPort->getValue();
-		else
-			fcgiPort += "9000";
-		// Open the FCGI socket
-		mFcgxSock = FCGX_OpenSocket(fcgiPort.c_str(), 4);
+			server->setPort( keyPort->getInteger() );
+
+		// Register the local router into server
+		server->setRouter(mRouter);
+
+		// Start server ! :)
+		mServer = server;
+		mServer->start();
 	} catch (...) {
 		// ToDo: handle error
 	}
-	Log::info() << "Hermod (FCGI) started socket=" << mFcgxSock << Log::endl;
-
+	Log::info() << "Hermod (FCGI) started" << Log::endl;
 	Log::sync();
+
 	return getInstance();
-}
-
-/**
- * @brief When a request is received on FCGI socket, this method process it
- *
- */
-void App::processFcgi (void)
-{
-	FCGX_Request fcgiReq;
-	Request  *req;
-	Response *rsp;
-	
-	FCGX_InitRequest(&fcgiReq, mFcgxSock, 0);
-	
-	if (FCGX_Accept_r(&fcgiReq) != 0)
-	{
-		Log::info() << "FastCGI interrupted during accept." << Log::endl;
-		Log::sync();
-		return;
-	}
-	// Instanciate a new Request
-	req = new Request( &fcgiReq );
-	// Instanciate a new Response
-	rsp = new Response( req );
-
-	if (req->getMethod() == Request::Option)
-	{
-		ResponseHeader *rh = rsp->header();
-		rh->addHeader("Allow", "HEAD,GET,PUT,DELETE,OPTIONS");
-		rh->addHeader("Access-Control-Allow-Headers", "access-control-allow-origin,x-requested-with");
-		std::string corsMethod = req->getParam("HTTP_CORS_METHOD");
-		if ( ! corsMethod.empty() )
-			rh->addHeader("Access-Control-Allow-Method", corsMethod);
-	}
-	else if ( (req->getMethod() == Request::Get) ||
-	          (req->getMethod() == Request::Post) )
-	{
-		RouteTarget *route = mRouter->find(req);
-		if ( ! route)
-		{
-			Log::info() << "Request an unknown URL: ";
-			Log::info() << req->getUri(0) << Log::endl;
-			route = mRouter->find(":404:");
-		}
-		if (route)
-		{
-			Log::info() << "App: Found a route for this request " << Log::endl;
-			Page *page = route->newPage();
-			if (page)
-			{
-				rsp->catchCout();
-
-				try {
-					page->setRequest( req );
-					page->setReponse( rsp );
-					page->initSession();
-					page->process();
-				} catch (std::exception &e) {
-					Log::info() << "Request::process Exception " << e.what() << Log::endl;
-				}
-
-				rsp->releaseCout();
-
-				route->freePage(page);
-			}
-			else
-			{
-				Log::info() << "App: Failed to load target page" << Log::endl;
-				rsp->header()->setRetCode(404, "Not found");
-			}
-		}
-		else
-		{
-			Log::info() << "No page in config for '404' error" << Log::endl;
-			rsp->header()->setRetCode(404, "Not found");
-		}
-	}
-	else
-	{
-		Log::info() << "App: Unknown method for this request :(" << Log::endl;
-		rsp->header()->setRetCode(404, "Not found");
-	}
-
-	rsp->send();
-
-	// Delete "Response" object at the end of the process
-	delete rsp;
-	rsp = NULL;
-	// Delete "Request" object at the end of the process
-	delete req;
-	req = 0;
-	
-	FCGX_Finish_r(&fcgiReq);
-
-	FCGX_Free(&fcgiReq, 0);
 }
 
 /**

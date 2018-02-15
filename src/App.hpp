@@ -16,6 +16,7 @@
 #define APP_HPP
 #include "ModuleCache.hpp"
 #include "Router.hpp"
+#include "Server.hpp"
 
 namespace hermod {
 
@@ -37,15 +38,13 @@ public:
 	static App* getInstance();
 public:
 	static void sigInt(void);
-protected:
-	void processFcgi (void);
 private:
 	App();
 	~App();
 private:
     	static App*  mAppInstance;
 	bool         mRunning;
-	int          mFcgxSock;
+	Server      *mServer;
 	Router      *mRouter;
 	ModuleCache  mModuleCache;
 };
