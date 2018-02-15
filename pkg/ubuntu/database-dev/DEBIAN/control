@@ -1,5 +1,5 @@
 Package: hermod-database-dev
-Version: 0.2
+Version: 0.3
 Section: httpd
 Priority: optional
 Source: hermod
@@ -7,5 +7,5 @@ Maintainer: Hooligan0 <gwen@ecowlogic.io>
 Build-Depends: debhelper (>=9)
 Standards-Version: 3.9.6
 Homepage: https://github.com/Hooligan-0/hermod
-Depends: hermod-dev (=0.2), libodb-dev (>=2.4.0), libodb-pgsql-dev (>=2.4.0)
+Depends: hermod-dev (=0.3), libodb-dev (>=2.4.0), libodb-pgsql-dev (>=2.4.0)
 Description: Header files for Hermod Database module

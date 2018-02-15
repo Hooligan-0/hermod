@@ -1,6 +1,6 @@
 # hermod #
 
-**Version** 0.2 (currently alpha/dev version)
+**Version** 0.3 (currently alpha/dev version)
 
 ## About ##
 
@@ -14,6 +14,10 @@ be seen as a framework or as an application server.
 * [How to use nginx as frontend](doc/nginx.md)
 
 ## Changelog ##
+
+* v0.3 Current "dev" version (unstable)
+
+  * Allow multiple server implementations (FastCGI, native HTTP, ...)
 
 * v0.2 First working alpha version
 

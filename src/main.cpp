@@ -206,7 +206,7 @@ static void help(void)
 	std::cout << "  -f        Run in foreground" << std::endl;
 	std::cout << "  --help    Display this information" << std::endl;
 	std::cout << std::endl;
-	std::cout << "Version: 0.2" << std::endl;
+	std::cout << "Version: 0.3" << std::endl;
 	std::cout << "Copyright (C) 2016-2018 Cowlab" << std::endl;
 	std::cout << "License: GNU LGPL version 3 <https://www.gnu.org/licenses/lgpl-3.0.html>" << std::endl;
 }

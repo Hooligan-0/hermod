@@ -1,5 +1,5 @@
 
-BUILD_DIR=./hermod_0.2_database
+BUILD_DIR=./hermod_0.3_database
 
 CP=cp -a
 MAKE=make

@@ -1,5 +1,5 @@
 Name:    hermod
-Version: 0.2
+Version: 0.3
 Release: 1%{?dist}
 Summary: A C++ web application server.
 License: Lesser General Public License
