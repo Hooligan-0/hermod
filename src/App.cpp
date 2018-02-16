@@ -211,11 +211,6 @@ App* App::init(void)
 		// Create the FCGI default interface
 		server = new ServerLibFcgi();
 
-		// Define the TCP port to listen
-		ConfigKey *keyPort = cfg->getKey("global", "port");
-		if (keyPort)
-			server->setPort( keyPort->getInteger() );
-
 		// Register the local router into server
 		server->setRouter(mRouter);
 

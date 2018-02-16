@@ -14,19 +14,14 @@
  */
 #include <string>
 #include <fcgio.h>
-#include <fcgios.h> // OS_IpcClose()
+#include <fcgios.h> // For OS_* functions
+#include "Config.hpp"
 #include "Log.hpp"
 #include "Request.hpp"
 #include "Response.hpp"
 #include "Router.hpp"
 #include "ServerLibFcgi.hpp"
 #include "String.hpp"
-
-// Call to OS_LibShutdown() is needed to avoid fcgi leak
-extern "C"
-{
-void OS_LibShutdown(void);
-}
 
 namespace hermod {
 
@@ -40,12 +35,24 @@ ServerLibFcgi::ServerLibFcgi()
 	mPort = 9000;
 }
 
+/**
+ * @brief Default destructor
+ *
+ */
 ServerLibFcgi::~ServerLibFcgi()
 {
 	// Free fcgi
 	OS_LibShutdown();
 }
 
+/**
+ * @brief Handler called when an event is detected on server socket
+ *
+ * This is th main processing method of this server. When an event is
+ * detected on FCGI socket (mainly new connection) this method call
+ * libfcgi to appept and decode it. Then, router is used to call a
+ * page that handle the URI/method.
+ */
 void ServerLibFcgi::processFd(void)
 {
 	FCGX_Request fcgiReq;
@@ -146,24 +153,45 @@ void ServerLibFcgi::processFd(void)
 	FCGX_Free(&fcgiReq, 0);
 }
 
+/**
+ * @brief Set the (tcp) port number where server must listen
+ *
+ * @param num Port number to use
+ */
 void ServerLibFcgi::setPort(int num)
 {
 	mPort = num;
 }
 
+/**
+ * @brief Start the FCGI server
+ *
+ * This method allow to start FCGI server.
+ */
 void ServerLibFcgi::start(void)
 {
-		std::string fcgiPort(":");
-		// Initialize library
-		FCGX_Init();
+	Config *cfg = Config::getInstance();
 
-		String portNum = String::number( mPort );
-		fcgiPort += portNum.toStdStr();
+	// Define the TCP port to listen
+	ConfigKey *keyPort = cfg->getKey("global", "port");
+	if (keyPort)
+		mPort = keyPort->getInteger();
 
-		// Open the FCGI socket
-		mFd = FCGX_OpenSocket(fcgiPort.c_str(), 4);
+	// Initialize library
+	FCGX_Init();
+
+	std::string fcgiPort(":");
+	fcgiPort += String::number(mPort).toStdStr();
+
+	// Open the FCGI socket
+	mFd = FCGX_OpenSocket(fcgiPort.c_str(), 4);
 }
 
+/**
+ * @brief Stop the FCGI server.
+ *
+ * This method allow to stop FCGI server without deleting it.
+ */
 void ServerLibFcgi::stop(void)
 {
 	if (mFd >= 0)
