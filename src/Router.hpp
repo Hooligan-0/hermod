@@ -1,7 +1,7 @@
 /*
  * Hermod - Modular application framework
  *
- * Copyright (c) 2016 Cowlab
+ * Copyright (c) 2016-2018 Cowlab
  *
  * Hermod is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License 
@@ -36,6 +36,7 @@ public:
 	Router (void);
 	~Router();
 	RouteTarget *createTarget(Module *module);
+	RouteTarget *createTarget(Module *module, const String &name, bool en = true);
 	void removeTarget(RouteTarget *target);
 	RouteTarget *find(const String &uri);
 	RouteTarget *find(Request *r);

@@ -1,7 +1,7 @@
 /*
  * Hermod - Modular application framework
  *
- * Copyright (c) 2016 Cowlab
+ * Copyright (c) 2016-2018 Cowlab
  *
  * Hermod is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License 
@@ -56,6 +56,28 @@ RouteTarget *Router::createTarget(Module *module)
 	target->setModule(module);
 	mTargets.push_back(target);
 	
+	return target;
+}
+
+/**
+ * @brief This method create a new named RouteTarget and register it into router
+ *
+ * @param module Pointer to the module that request a new route target
+ * @param name   Reference to a String that contains the name of the new target
+ * @param en     Define if the new target is enabled (or not)
+ * @return RouteTarget* Pointer the the newly allocated target.
+ */
+RouteTarget *Router::createTarget(Module *module, const String &name, bool en)
+{
+	RouteTarget *target = new RouteTarget;
+	target->setModule(module);
+	target->setName(name);
+	if (en)
+		target->enable();
+	else
+		target->disable();
+	mTargets.push_back(target);
+
 	return target;
 }
 
