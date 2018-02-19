@@ -119,19 +119,35 @@ App* App::exec(void)
 			fd_set rfds;
 			struct timeval tv;
 			int retval;
-			int maxFd  = 1;
+			int maxFd  = 0;
+			int i;
 
 			FD_ZERO(&rfds);
-			FD_SET(mServer->getFd(), &rfds);
-			maxFd = (mServer->getFd() + 1);
+			for (i = 0; /**/; i++)
+			{
+				// Get the next server fd
+				int fd = mServer->getFd(i);
+				// If this is the last fd (or no fd available)
+				if (fd < 0)
+					break;
+				// Insert this fd into the "select" list
+				FD_SET(fd, &rfds);
+				// Update the highest fd number
+				if (fd >= maxFd)
+					maxFd = (fd + 1);
+			}
 
 			tv.tv_sec = 5;
 			tv.tv_usec = 0;
 			retval = select(maxFd, &rfds, NULL, NULL, &tv);
 			if (retval > 0)
 			{
-				if (FD_ISSET(mServer->getFd(), &rfds) )
-					mServer->processFd();
+				for (i = 0; i < maxFd; i++)
+				{
+					if ( ! FD_ISSET(i, &rfds))
+						continue;
+					mServer->processFd(i);
+				}
 			}
 			else if (retval == 0)
 			{

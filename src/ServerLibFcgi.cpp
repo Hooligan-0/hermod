@@ -53,7 +53,7 @@ ServerLibFcgi::~ServerLibFcgi()
  * libfcgi to appept and decode it. Then, router is used to call a
  * page that handle the URI/method.
  */
-void ServerLibFcgi::processFd(void)
+void ServerLibFcgi::processFd(int fd)
 {
 	FCGX_Request fcgiReq;
 	Request  *req;
@@ -61,7 +61,14 @@ void ServerLibFcgi::processFd(void)
 
 	if (mRouter == 0)
 	{
-		Log::error() << "Server:FastCGI: Failed to process FD (no router)" << Log::endl;
+		Log::error() << "Server: Failed to process FD (no router)" << Log::endl;
+		Log::sync();
+		return;
+	}
+
+	if ((fd != mFd) && (fd != -1))
+	{
+		Log::error() << "Server: Failed to process FD (unknown fd)" << Log::endl;
 		Log::sync();
 		return;
 	}
@@ -74,8 +81,7 @@ void ServerLibFcgi::processFd(void)
 		Log::sync();
 		return;
 	}
-	Log::info() << "FastCGI Accepted connection." << Log::endl;
-	Log::sync();
+
 	// Instanciate a new Request
 	req = new Request( &fcgiReq );
 	// Instanciate a new Response

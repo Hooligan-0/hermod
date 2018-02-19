@@ -41,10 +41,14 @@ Server::~Server(void)
 /**
  * @brief Get the descriptor used by server to listen for events
  *
+ * @param index Index to get (when server can handle multiple connection)
  * @return integer Descriptor ID
  */
-int Server::getFd(void)
+int Server::getFd(unsigned int index)
 {
+	if (index != 0)
+		return (-1);
+
 	return mFd;
 }
 
@@ -56,9 +60,10 @@ int Server::getFd(void)
  * Here this fallback method just close the descriptor because if not overloaded
  * nobody know how to process such event.
  */
-void Server::processFd(void)
+void Server::processFd(int fd)
 {
-	Log::warning() << "Server: Event on descriptor but no processing function available !" << Log::endl;
+	Log::warning() << "Server: Event on descriptor " << fd
+	               << " but no processing function available !" << Log::endl;
 	// Close server FD to avoid further error
 	close(mFd);
 	mFd = -1;

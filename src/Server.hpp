@@ -34,8 +34,8 @@ public:
 	Server();
 	virtual ~Server();
 
-	int  getFd(void);
-	virtual void processFd(void);
+	virtual int  getFd    (unsigned int index = 0);
+	virtual void processFd(int fd = -1);
 	virtual void setRouter(Router *router);
 	virtual void start(void) = 0;
 	virtual void stop (void) = 0;

@@ -24,7 +24,7 @@ class ServerLibFcgi : public Server
 public:
 	ServerLibFcgi();
 	~ServerLibFcgi();
-	void processFd(void);
+	void processFd(int fd = -1);
 	void setPort(int num);
 	void start(void);
 	void stop (void);
