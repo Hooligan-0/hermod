@@ -46,10 +46,17 @@ ServerLibFcgi::~ServerLibFcgi()
 	OS_LibShutdown();
 }
 
+/**
+ * @brief Get the body content received with request and update Request object
+ *
+ * @param req  Pointer to the Request object to update with body
+ * @param fcgi Pointer to the LibFCGI request structure
+ */
 void ServerLibFcgi::loadHttpBody(Request *req, FCGX_Request *fcgi)
 {
 	String *buffer;
 
+	// Search body (content) length into HTTP headers
 	String contentLength = req->getParam("CONTENT_LENGTH");
 	if (contentLength.isEmpty())
 	{
@@ -59,17 +66,26 @@ void ServerLibFcgi::loadHttpBody(Request *req, FCGX_Request *fcgi)
 
 	int len = contentLength.toInt();
 
+	// Allocate a String to hold body, and get it
 	buffer = new String();
 	buffer->reserve(len);
 	FCGX_GetStr(buffer->data(), len, fcgi->in);
 
+	// Set this body into Request (give owership of buffer)
 	req->setBody(buffer);
 }
 
+/**
+ * @brief Decode received HTTP headers and update Request object accordingly
+ *
+ * @param req  Pointer to the Request object to update
+ * @param fcgi Pointer to the LibFCGI request structure
+ */
 void ServerLibFcgi::loadHttpParameters(Request *req, FCGX_Request *fcgi)
 {
 	char **p;
 
+	// Parse the array of strings received by LibFCGI
 	for (p = fcgi->envp; *p; ++p)
 	{
 		String arg(*p);
@@ -158,7 +174,9 @@ void ServerLibFcgi::processFd(int fd)
 		}
 		if (route)
 		{
-			Log::info() << "App: Found a route for this request " << Log::endl;
+			Log::info() << "Server: Request"
+			            << " module=" << route->getModule()->getName()
+			            << " target=" << route->getName() << Log::endl;
 			Page *page = route->newPage();
 			if (page)
 			{
@@ -203,10 +221,11 @@ void ServerLibFcgi::processFd(int fd)
 	// Delete "Request" object at the end of the process
 	delete req;
 	req = 0;
-	
-	FCGX_Finish_r(&fcgiReq);
 
+	// Finish LibFCGI request and free memory
+	FCGX_Finish_r(&fcgiReq);
 	FCGX_Free(&fcgiReq, 0);
+	mFCGX = 0;
 }
 
 /**
