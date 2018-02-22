@@ -32,6 +32,7 @@ namespace hermod {
 ServerLibFcgi::ServerLibFcgi()
   : Server()
 {
+	mFCGX = 0;
 	mPort = 9000;
 }
 
@@ -43,6 +44,49 @@ ServerLibFcgi::~ServerLibFcgi()
 {
 	// Free fcgi
 	OS_LibShutdown();
+}
+
+void ServerLibFcgi::loadHttpBody(Request *req, FCGX_Request *fcgi)
+{
+	String *buffer;
+
+	String contentLength = req->getParam("CONTENT_LENGTH");
+	if (contentLength.isEmpty())
+	{
+		Log::warning() << "Server: Failed to load HTTP body" << Log::endl;
+		return;
+	}
+
+	int len = contentLength.toInt();
+
+	buffer = new String();
+	buffer->reserve(len);
+	FCGX_GetStr(buffer->data(), len, fcgi->in);
+
+	req->setBody(buffer);
+}
+
+void ServerLibFcgi::loadHttpParameters(Request *req, FCGX_Request *fcgi)
+{
+	char **p;
+
+	for (p = fcgi->envp; *p; ++p)
+	{
+		String arg(*p);
+		int pos;
+
+		// Search name/value separator
+		pos = arg.indexOf('=');
+		if (pos <= 0)
+			continue;
+		// Extract parameter name
+		String argName  = arg.left(pos);
+		// Extract parameter value
+		String argValue = arg.right( arg.length() - pos - 1);
+
+		// Add this HTTP parameter into Request
+		req->setHeaderParameter(argName, argValue);
+	}
 }
 
 /**
@@ -82,10 +126,16 @@ void ServerLibFcgi::processFd(int fd)
 		return;
 	}
 
+	// Save a (temporary) copy of FCGX request
+	mFCGX = &fcgiReq;
+
 	// Instanciate a new Request
-	req = new Request( &fcgiReq );
+	req = new Request(this);
+	loadHttpParameters(req, &fcgiReq);
+	loadHttpBody(req, &fcgiReq);
 	// Instanciate a new Response
 	rsp = new Response( req );
+	rsp->setServer(this);
 
 	if (req->getMethod() == Request::Option)
 	{
@@ -157,6 +207,20 @@ void ServerLibFcgi::processFd(int fd)
 	FCGX_Finish_r(&fcgiReq);
 
 	FCGX_Free(&fcgiReq, 0);
+}
+
+/**
+ * @brief Send data as response of a request
+ *
+ * @param data Pointer to a buffer with datas to send
+ * @param len  Length of the buffer
+ */
+void ServerLibFcgi::send(const char *data, int len)
+{
+	if ( (mFCGX == 0) || (data == 0) )
+		return;
+
+	FCGX_PutStr(data, len, mFCGX->out);
 }
 
 /**

@@ -70,6 +70,16 @@ void Server::processFd(int fd)
 }
 
 /**
+ * @brief Send a String buffer to a connected connection
+ *
+ * @param content Reference to the String to send
+ */
+void Server::send(const String &content)
+{
+	send(content.data(), content.length());
+}
+
+/**
  * @brief Set the router associated with this server
  *
  * @param Router* Pointer to the router to use.

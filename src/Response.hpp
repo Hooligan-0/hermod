@@ -19,6 +19,7 @@
 #include <streambuf>
 #include "ResponseHeader.hpp"
 #include "Content.hpp"
+#include "Server.hpp"
 
 namespace hermod {
 
@@ -40,9 +41,11 @@ public:
 	void send(void);
 	void setContent(Content *content);
 	void setRequest(Request *request);
+	void setServer (Server  *server);
 private:
 	Request          *mRequest;
 	ResponseHeader    mHeader;
+	Server           *mServer;
 	Content          *mContent;
 	std::streambuf   *mCoutBackup;
 	std::stringstream mCoutBuffer;

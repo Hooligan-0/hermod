@@ -15,6 +15,8 @@
 #ifndef SERVER_LIBFCGI_HPP
 #define SERVER_LIBFCGI_HPP
 
+#include <fcgio.h>
+#include "Request.hpp"
 #include "Server.hpp"
 
 namespace hermod {
@@ -25,12 +27,17 @@ public:
 	ServerLibFcgi();
 	~ServerLibFcgi();
 	void processFd(int fd = -1);
+	void send     (const char *data, int len);
 	void setPort(int num);
 	void start(void);
 	void stop (void);
+protected:
+	void loadHttpBody      (Request *req, FCGX_Request *fcgi);
+	void loadHttpParameters(Request *req, FCGX_Request *fcgi);
 private:
 	int mPort;
 	int mSocketFd;
+	FCGX_Request *mFCGX;
 };
 
 } // namespace hermod

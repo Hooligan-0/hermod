@@ -1,7 +1,7 @@
 /*
  * Hermod - Modular application framework
  *
- * Copyright (c) 2016 Cowlab
+ * Copyright (c) 2016-2018 Cowlab
  *
  * Hermod is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License 
@@ -16,9 +16,9 @@
 #define REQUEST_HPP
 
 #include <map>
-#include <fcgio.h>
 #include "ModuleCache.hpp"
 #include "Page.hpp"
+#include "Server.hpp"
 #include "String.hpp"
 
 namespace hermod {
@@ -36,10 +36,9 @@ class Request
 public:
 	enum Method { Undef, Get, Post, Option };
 public:
-	explicit Request(FCGX_Request *req);
+	explicit Request(Server *server);
 	~Request();
 	unsigned int  countUriArgs(void);
-	FCGX_Request *getFCGX (void);
 	String  getContentType(void);
 	Method  getMethod(void);
 	String  getParam (const String &name);
@@ -48,13 +47,17 @@ public:
 	String  getCookieByName(const String &name, bool allowEmpty);
 	bool    hasFormValue (const String &name);
 	bool    isAccept(const String &type);
+	void    setBody (String *body);
+	void    setHeaderParameter(const String &name, const String &value);
 	void    setUri  (const String &route);
 protected:
 	void    loadFormInputs(void);
 private:
-	FCGX_Request  *mFcgiRequest;
+	Server        *mServer;
 	Method         mMethod;
+	String        *mBody;
 	std::vector<String>       mUri;
+	std::map <String, String> mHeaderParameters;
 	std::map <String, String> mFormParameters;
 };
 

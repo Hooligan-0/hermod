@@ -1,7 +1,7 @@
 /*
  * Hermod - Modular application framework
  *
- * Copyright (c) 2016 Cowlab
+ * Copyright (c) 2016-2018 Cowlab
  *
  * Hermod is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License 
@@ -13,7 +13,7 @@
  * Authors: Saint-Genest Gwenael <gwen@hooligan0.net>
  */
 #include <iostream>
-#include <fcgio.h>
+#include "Log.hpp"
 #include "Response.hpp"
 #include "Request.hpp"
 
@@ -29,6 +29,7 @@ Response::Response(Request *request)
 	mContent     = 0;
 	mCoutBackup  = NULL;
 	mRequest     = NULL;
+	mServer      = 0;
 	if (request)
 		setRequest(request);
 }
@@ -101,18 +102,20 @@ void Response::releaseCout(void)
  */
 void Response::send(void)
 {
-	FCGX_Request *fcgi = mRequest->getFCGX();
-	FCGX_Stream *fout = fcgi->out;
+	if (mServer == 0)
+		return;
+
 	// Send Header
-	FCGX_PutS(mHeader.getHeader().data(), fout);
+	mServer->send( mHeader.getHeader() );
 	// Send Content
 	if (mContent)
 	{
 		const char *ptrContent = mContent->getCBuffer();
-		FCGX_PutStr(ptrContent, mContent->size(), fout);
+		mServer->send(ptrContent, mContent->size());
 	}
 	// Send cout buffer
-	FCGX_PutS(mCoutBuffer.str().c_str(), fout);
+	std::string s = mCoutBuffer.str();
+	mServer->send(s.c_str(), s.length());
 }
 
 /**
@@ -138,19 +141,19 @@ void Response::setContent(Content *content)
 void Response::setRequest(Request *request)
 {
 	mRequest = request;
-	FCGX_Request *fcgi = mRequest->getFCGX();
-	
+
 	// Process "Origin" header
-	const char *oh = FCGX_GetParam("HTTP_ORIGIN", fcgi->envp);
-	if (oh)
-	{
-		std::string o( oh );
-		if ( ! o.empty() )
-			mHeader.addHeader("Access-Control-Allow-Origin", o);
-	}
+	String oh = request->getParam("HTTP_ORIGIN");
+	if ( ! oh.isEmpty())
+		mHeader.addHeader("Access-Control-Allow-Origin", oh);
 
 	// Allow credentials control
 	mHeader.addHeader("Access-Control-Allow-Credentials", "true");
+}
+
+void Response::setServer(Server *server)
+{
+	mServer = server;
 }
 
 } // namespace hermod

@@ -1,7 +1,7 @@
 /*
  * Hermod - Modular application framework
  *
- * Copyright (c) 2016 Cowlab
+ * Copyright (c) 2016-2018 Cowlab
  *
  * Hermod is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License 
@@ -25,18 +25,13 @@ namespace hermod {
  * @brief Default constructor
  *
  */
-Request::Request(FCGX_Request *req)
+Request::Request(Server *server)
 {
-	mFcgiRequest = req;
-	mMethod      = Undef;
+	mBody   = 0;
+	mServer = server;
+	mMethod = Undef;
 
-	try {
-		String qs = getParam("QUERY_STRING");
-		if ( ! qs.isEmpty() )
-			mUri.push_back( qs );
-	} catch (...) {
-		mUri.clear();
-	}
+	mUri.clear();
 }
 
 /**
@@ -45,7 +40,11 @@ Request::Request(FCGX_Request *req)
  */
 Request::~Request()
 {
-	// Nothing to do
+	if (mBody)
+	{
+		delete mBody;
+		mBody = 0;
+	}
 }
 
 /**
@@ -133,16 +132,6 @@ String Request::getCookieByName(const String &name, bool allowEmpty = false)
 }
 
 /**
- * @brief Get the FastCGI request
- *
- * @return FCGX_Request* Pointer to the FastCGI request used as input
- */
-FCGX_Request *Request::getFCGX(void)
-{
-	return mFcgiRequest;
-}
-
-/**
  * @brief Get the content type of the request
  *
  * @return String Mime type of the request
@@ -190,7 +179,13 @@ Request::Method Request::getMethod(void)
  */
 String Request::getParam (const String &name)
 {
-	String value = FCGX_GetParam(name.data(), mFcgiRequest->envp);
+	String value;
+
+	std::map<String, String>::iterator it;
+	it = mHeaderParameters.find(name);
+
+	if (it != mHeaderParameters.end())
+		value = mHeaderParameters[name];
 
 	return value;
 }
@@ -317,11 +312,11 @@ void Request::loadFormInputs(void)
 		if (len > (1024 * 1024))
 			return;
 		// Get datas
-		String buffer;
-		buffer.reserve(len);
-		FCGX_GetStr(buffer, len, mFcgiRequest->in);
-		char *pnt = buffer;
-		char *token = buffer;
+		if ( (mBody == 0) || mBody->isEmpty())
+			return;
+		char *pnt   = mBody->data();
+		char *token = mBody->data();
+
 		String paramName;
 		String paramValue;
 		while(1)
@@ -352,6 +347,35 @@ void Request::loadFormInputs(void)
 			pnt ++;
 		}
 	}
+}
+
+/**
+ * @brief Set the Request body
+ *
+ * @param body Pointer to a buffer (String) that contain body content
+ */
+void Request::setBody(String *body)
+{
+	// If a body has already been set ... delete it
+	if (mBody)
+		delete mBody;
+
+	// Copy pointer to body buffer (and get ownership)
+	mBody = body;
+}
+
+/**
+ * @brief Insert (or update) an HTTP header parameter
+ *
+ * @param name  String that contain parameter name
+ * @param value String that contain parameter value
+ */
+void Request::setHeaderParameter(const String &name, const String &value)
+{
+	mHeaderParameters[ name ] = value;
+
+	if (name == "QUERY_STRING")
+		mUri.push_back(value);
 }
 
 /**
