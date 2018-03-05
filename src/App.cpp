@@ -25,6 +25,7 @@
 #include "Response.hpp"
 #include "Router.hpp"
 #include "SessionCache.hpp"
+#include "ServerFastcgi.hpp"
 #include "ServerLibFcgi.hpp"
 
 namespace hermod {
@@ -188,6 +189,7 @@ App* App::exec(void)
 App* App::init(void)
 {
 	Config *cfg = Config::getInstance();
+	String  cfgServer("libfcgi");
 	
 	try {
 		String cfgFile;
@@ -221,18 +223,53 @@ App* App::init(void)
 		pos++;
 	}
 
+	try {
+		ConfigKey *cfgKey;
+		// Get the server type from config
+		cfgKey = cfg->getKey("global", "server");
+		// If the config key exists, read it
+		if (cfgKey)
+			cfgServer = cfgKey->getValue();
+	} catch (std::exception& e) {
+		// ToDo: print some message ?
+	}
+	Log::info() << "App: server type = " << cfgServer << Log::endl;
+
 	// Start FCGI server
 	try {
-		ServerLibFcgi *server;
-		// Create the FCGI default interface
-		server = new ServerLibFcgi();
+		if (cfgServer == "fastcgi")
+		{
+			ServerFastcgi *server;
+			// Create a new FastCGI server
+			server = new ServerFastcgi();
 
-		// Register the local router into server
-		server->setRouter(mRouter);
+			// Register the local router into server
+			server->setRouter(mRouter);
 
-		// Start server ! :)
-		mServer = server;
+			// Start server ! :)
+			mServer = server;
+		}
+		else if (cfgServer == "libfcgi")
+		{
+			ServerLibFcgi *server;
+			// Create the FCGI default interface
+			server = new ServerLibFcgi();
+
+			// Register the local router into server
+			server->setRouter(mRouter);
+
+			// Start server ! :)
+			mServer = server;
+		}
+		else
+			throw std::runtime_error("Unknown server type declared");
+
 		mServer->start();
+
+	} catch (std::exception& e) {
+		Log::error() << "Failed to start Hermod server: "
+		             << e.what() << Log::endl;
+		throw;
 	} catch (...) {
 		// ToDo: handle error
 	}
