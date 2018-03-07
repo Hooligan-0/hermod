@@ -26,6 +26,19 @@
 
 namespace hermod {
 
+typedef struct
+{
+	unsigned char version;
+	unsigned char type;
+	unsigned char requestIdB1;
+	unsigned char requestIdB0;
+	unsigned char contentLengthB1;
+	unsigned char contentLengthB0;
+	unsigned char paddingLength;
+	unsigned char reserved;
+} FCGI_Record;
+
+
 /**
  * @brief Default constructor
  *
@@ -37,6 +50,8 @@ ServerFastcgi::ServerFastcgi()
 	mPort = 9000;
 
 	mClients.clear();
+	mRxBuffer = 0;
+	mRxHeaderLength = 0;
 }
 
 /**
@@ -54,17 +69,76 @@ ServerFastcgi::~ServerFastcgi()
 
 void ServerFastcgi::clientEvent(void)
 {
-	char buffer[1024];
 	int len;
 
 	try {
-		len = read(mFd, buffer, 1024);
-		// If read length is 0, socket has been closed
-		if (len == 0)
-			throw -1;
-		// A negative value is returned in case of error
-		if (len < 0)
-			throw runtime_error("ERROR reading from socket");
+		FCGI_Record   *rec;
+		unsigned int   recLen;
+
+		//
+		if (mRxHeaderLength < 8)
+		{
+			len = 8 - mRxHeaderLength;
+
+			len = read(mFd, mRxHeader + mRxHeaderLength, len);
+			// If read length is 0, socket has been closed
+			if (len == 0)
+				throw -1;
+			// A negative value is returned in case of error
+			if (len < 0)
+				throw runtime_error("ERROR reading from socket");
+
+			mRxHeaderLength += len;
+
+			if (mRxHeaderLength < 8)
+				return;
+
+			rec = (FCGI_Record *)mRxHeader;
+			recLen = (rec->contentLengthB0) | (rec->contentLengthB1 << 8);
+			recLen += rec->paddingLength;
+			mRxBuffer = (unsigned char *)malloc(recLen);
+			if (mRxBuffer == 0)
+				throw std::bad_alloc();
+			mRxLength = 0;
+
+			if (recLen != 0)
+				return;
+		}
+
+		//
+		rec = (FCGI_Record *)mRxHeader;
+		recLen = (rec->contentLengthB0) | (rec->contentLengthB1 << 8);
+
+		if (mRxLength < recLen)
+		{
+			// Compute length of data to get
+			len = (recLen + rec->paddingLength) - mRxLength;
+			// Get datas from socket
+			len = read(mFd, mRxBuffer + mRxLength, len);
+			// If read length is 0, socket has been closed
+			if (len == 0)
+				throw -1;
+			// A negative value is returned in case of error
+			if (len < 0)
+				throw runtime_error("ERROR reading from socket");
+
+			// Update length of received datas
+			mRxLength += len;
+			if (mRxLength < (recLen + rec->paddingLength))
+				return;
+		}
+		Log::debug() << "FCGI Record type " << rec->type
+		             << " len=" << recLen
+		             << " buffer_len=" << mRxLength << Log::endl;
+		Log::sync();
+
+		// ToDo : Process packet
+
+		// Processing complete, discard packet
+		free(mRxBuffer);
+		mRxBuffer = 0;
+		mRxLength = 0;
+		mRxHeaderLength = 0;
 
 	} catch(int ecode) {
 		Log::error() << "Server: clientEvent " << mFd

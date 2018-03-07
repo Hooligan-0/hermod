@@ -39,6 +39,10 @@ private:
 	int mMode;
 	int mPort;
 	std::vector <ServerFastcgi *> mClients;
+	unsigned char  mRxHeader[8];
+	unsigned int   mRxHeaderLength;
+	unsigned char *mRxBuffer;
+	unsigned int   mRxLength;
 };
 
 } // namespace hermod
