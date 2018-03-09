@@ -18,13 +18,25 @@
 #include <unistd.h>
 #include "Config.hpp"
 #include "Log.hpp"
-#include "Request.hpp"
 #include "Response.hpp"
 #include "Router.hpp"
 #include "ServerFastcgi.hpp"
 #include "String.hpp"
 
 namespace hermod {
+
+#define FCGI_BEGIN_REQUEST       1
+#define FCGI_ABORT_REQUEST       2
+#define FCGI_END_REQUEST         3
+#define FCGI_PARAMS              4
+#define FCGI_STDIN               5
+#define FCGI_STDOUT              6
+#define FCGI_STDERR              7
+#define FCGI_DATA                8
+#define FCGI_GET_VALUES          9
+#define FCGI_GET_VALUES_RESULT  10
+#define FCGI_UNKNOWN_TYPE       11
+#define FCGI_MAXTYPE (FCGI_UNKNOWN_TYPE)
 
 typedef struct
 {
@@ -49,9 +61,13 @@ ServerFastcgi::ServerFastcgi()
 	mMode = 0; // Define as server
 	mPort = 9000;
 
+	mState = 0;
+
 	mClients.clear();
 	mRxBuffer = 0;
 	mRxHeaderLength = 0;
+
+	mRequest = 0;
 }
 
 /**
@@ -60,10 +76,70 @@ ServerFastcgi::ServerFastcgi()
  */
 ServerFastcgi::~ServerFastcgi()
 {
+	// Clean the client objects (if any)
+	while(mClients.size())
+	{
+		ServerFastcgi *c = mClients.back();
+		mClients.pop_back();
+		delete c;
+	}
+
+	// Close the client or the server socket (if open)
 	if (mFd >= 0)
 	{
 		close(mFd);
 		mFd = -1;
+	}
+
+	// If a Request has been allocated, delete it
+	if (mRequest)
+	{
+		delete mRequest;
+		mRequest = 0;
+	}
+}
+
+/**
+ * @brief Decode a FCGI packet with parameters
+ *
+ * @param len Length of the received data packet (withour padding)
+ */
+void ServerFastcgi::clientDecodeParam(unsigned int len)
+{
+	char *ptr;
+
+	// Sanity check
+	if (mRxBuffer == 0)
+		return;
+
+	ptr = (char *)mRxBuffer;
+
+	// A packet may contains multiple parameters, decode each
+	for (unsigned int i = 0; i < len; )
+	{
+		char argName[64];
+		char argValue[64];
+
+		// First two bytes contains fields lengths
+		int nameLen  = ptr[0];
+		int valueLen = ptr[1];
+
+		ptr += 2;
+		i   += 2;
+
+		// Extract the parameter name
+		bzero(argName, 64);
+		strncpy(argName, (char *)ptr, nameLen);
+		ptr += nameLen;
+		i   += nameLen;
+		// Extract the parameter value
+		bzero(argValue, 64);
+		strncpy(argValue, (char *)ptr, valueLen);
+		ptr += valueLen;
+		i   += valueLen;
+
+		// Add this HTTP parameter into Request
+		mRequest->setHeaderParameter(argName, argValue);
 	}
 }
 
@@ -133,6 +209,18 @@ void ServerFastcgi::clientEvent(void)
 		Log::sync();
 
 		// ToDo : Process packet
+		if (rec->type == FCGI_BEGIN_REQUEST)
+		{
+			mRequest = new Request(this);
+			mState = 1;
+		}
+		else if (rec->type == FCGI_PARAMS)
+		{
+			if (recLen)
+				clientDecodeParam(recLen);
+			if (recLen == 0)
+				mState = 2;
+		}
 
 		// Processing complete, discard packet
 		free(mRxBuffer);
@@ -148,6 +236,8 @@ void ServerFastcgi::clientEvent(void)
 			close (mFd);
 			mFd = -1;
 		}
+		if (ecode == -3)
+			throw std::runtime_error("ServerFastcgi: missing Router");
 	} catch(...) {
 		Log::error() << "Server: Fastcgi::clientEvent" << Log::endl;
 	}

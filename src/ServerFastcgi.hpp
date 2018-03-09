@@ -16,6 +16,7 @@
 #define SERVER_FASTCGI_HPP
 
 #include <vector>
+#include "Request.hpp"
 #include "Server.hpp"
 
 namespace hermod {
@@ -33,16 +34,20 @@ public:
 	void start(void);
 	void stop (void);
 protected:
+	void clientDecodeParam(unsigned int len);
 	void clientEvent(void);
 	void serverEvent(void);
 private:
 	int mMode;
 	int mPort;
+	int mState;
 	std::vector <ServerFastcgi *> mClients;
 	unsigned char  mRxHeader[8];
 	unsigned int   mRxHeaderLength;
 	unsigned char *mRxBuffer;
 	unsigned int   mRxLength;
+private:
+	Request  *mRequest;
 };
 
 } // namespace hermod
