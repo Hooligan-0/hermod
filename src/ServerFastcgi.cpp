@@ -380,9 +380,24 @@ void ServerFastcgi::processFd(int fd)
 				}
 			}
 
-			//
+			// If a client has been found
 			if (client)
+			{
 				client->processFd();
+				// If the client socket has ben closed
+				if (client->getFd() < 0)
+				{
+					// Search the client into local cache
+					std::vector<ServerFastcgi *>::iterator it;
+					for (it = mClients.begin(); it != mClients.end(); ++it)
+					{
+						if (client != (*it))
+							continue;
+						mClients.erase(it);
+						break;
+					}
+				}
+			}
 		}
 	}
 }
