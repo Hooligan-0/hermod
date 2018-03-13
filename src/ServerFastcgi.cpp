@@ -221,12 +221,7 @@ void ServerFastcgi::clientEvent(void)
 			if (mRxLength < (recLen + rec->paddingLength))
 				return;
 		}
-		Log::debug() << "FCGI Record type " << rec->type
-		             << " len=" << recLen
-		             << " buffer_len=" << mRxLength << Log::endl;
-		Log::sync();
 
-		// ToDo : Process packet
 		if (rec->type == FCGI_BEGIN_REQUEST)
 		{
 			// Save the request ID
@@ -290,7 +285,8 @@ void ServerFastcgi::clientEvent(void)
 							page->initSession();
 							page->process();
 						} catch (std::exception &e) {
-							Log::info() << "Request::process Exception " << e.what() << Log::endl;
+							Log::warning() << "Server: Exception during page processing: "
+								       << e.what() << Log::endl;
 						}
 						mResponse->releaseCout();
 						route->freePage(page);
@@ -498,11 +494,8 @@ void ServerFastcgi::serverEvent(void)
 		client->setRouter(mRouter);
 
 		mClients.push_back(client);
-
-		Log::info() << "FastCGI accept client. fd=" << fd << Log::endl;
-		Log::sync();
 	} catch(...) {
-		Log::error() << "Server-Fastcgi: Failed to accept incoming connection" << Log::endl;
+		Log::error() << "Server: Failed to accept incoming connection" << Log::endl;
 		// Delete/clean the client object (if any)
 		if (client)
 		{
@@ -515,8 +508,6 @@ void ServerFastcgi::serverEvent(void)
 
 		throw;
 	}
-	Log::info() << "FastCGI Accepted connection fd=" << fd << Log::endl;
-	Log::sync();
 }
 
 void ServerFastcgi::setClient(int fd)
