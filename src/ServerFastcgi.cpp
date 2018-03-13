@@ -66,8 +66,10 @@ ServerFastcgi::ServerFastcgi()
 	mClients.clear();
 	mRxBuffer = 0;
 	mRxHeaderLength = 0;
+	mBody = 0;
 
-	mRequest = 0;
+	mRequest  = 0;
+	mResponse = 0;
 }
 
 /**
@@ -96,6 +98,18 @@ ServerFastcgi::~ServerFastcgi()
 	{
 		delete mRequest;
 		mRequest = 0;
+	}
+	// If a Response has been allocated, delete it
+	if (mResponse)
+	{
+		delete mResponse;
+		mResponse = 0;
+	}
+	// If a Body has been allocated and not used by Request, delete it
+	if (mBody)
+	{
+		delete mBody;
+		mBody = 0;
 	}
 }
 
@@ -150,6 +164,10 @@ void ServerFastcgi::clientEvent(void)
 	try {
 		FCGI_Record   *rec;
 		unsigned int   recLen;
+
+		// Sanity check
+		if (mRouter == 0)
+			throw -3;
 
 		//
 		if (mRxHeaderLength < 8)
@@ -211,7 +229,15 @@ void ServerFastcgi::clientEvent(void)
 		// ToDo : Process packet
 		if (rec->type == FCGI_BEGIN_REQUEST)
 		{
+			// Save the request ID
+			mRecId = (rec->requestIdB1 << 8) | rec->requestIdB0;
+
+			// Instanciate a Request
 			mRequest = new Request(this);
+			// Instanciate a Response for this request
+			mResponse = new Response(mRequest);
+			mResponse->setServer(this);
+
 			mState = 1;
 		}
 		else if (rec->type == FCGI_PARAMS)
@@ -220,6 +246,66 @@ void ServerFastcgi::clientEvent(void)
 				clientDecodeParam(recLen);
 			if (recLen == 0)
 				mState = 2;
+		}
+		else if (rec->type == FCGI_STDIN)
+		{
+			if (recLen)
+			{
+				int bodyLength = 0;
+				// Search body (content) length into HTTP headers
+				String contentLength = mRequest->getParam("CONTENT_LENGTH");
+				if ( ! contentLength.isEmpty())
+					bodyLength = contentLength.toInt();
+				if (bodyLength > 0)
+				{
+					unsigned int j;
+					char *pIn, *pOut;
+					// Allocate a String to hold body, and get it
+					mBody = new String();
+					mBody->reserve(len);
+					pIn  = (char *)mRxBuffer;
+					pOut = mBody->data();
+					for (j = 0; j < recLen; j++)
+					{
+						*pOut++ = *pIn++;
+					}
+				}
+			}
+			if (recLen == 0)
+			{
+				// Set this body into Request (give owership of buffer)
+				mRequest->setBody(mBody);
+				mBody = 0;
+
+				RouteTarget *route = mRouter->find(mRequest);
+				if (route)
+				{
+					Page *page = route->newPage();
+					if (page)
+					{
+						mResponse->catchCout();
+						try {
+							page->setRequest(mRequest);
+							page->setReponse(mResponse);
+							page->initSession();
+							page->process();
+						} catch (std::exception &e) {
+							Log::info() << "Request::process Exception " << e.what() << Log::endl;
+						}
+						mResponse->releaseCout();
+						route->freePage(page);
+					}
+					else
+					{
+						mResponse->header()->setRetCode(404, "Not found");
+					}
+				}
+
+				mResponse->send();
+				sendEndRequest();
+				close(mFd);
+				mFd = -1;
+			}
 		}
 
 		// Processing complete, discard packet
@@ -309,9 +395,63 @@ void ServerFastcgi::processFd(int fd)
  */
 void ServerFastcgi::send(const char *data, int len)
 {
-	(void)data;
-	(void)len;
+	FCGI_Record rec;
+
+	// Create a FCGI record header
+	rec.version = 1;
+	rec.type    = FCGI_STDOUT;
+	rec.requestIdB1     = (mRecId <<   8);
+	rec.requestIdB0     = (mRecId & 0xFF);
+	rec.contentLengthB1 = ( len   >>   8);
+	rec.contentLengthB0 = ( len   & 0xFF);
+	rec.paddingLength   = 0;
+	rec.reserved        = 0;
+	// Send it
+	write(mFd, &rec, 8);
+
+	if (len > 0)
+		write(mFd, data, len);
+
 	return;
+}
+
+/**
+ * @brief Finish a FCGI transaction by sending END_REQUEST
+ *
+ */
+void ServerFastcgi::sendEndRequest(void)
+{
+	FCGI_Record rec;
+	char buffer[8];
+
+	// Send a STDOUT record without content to finish STDOUT step
+	send(0, 0);
+
+	// Create a FCGI record header
+	rec.version = 1;
+	rec.type    = FCGI_END_REQUEST;
+	rec.requestIdB1     = (mRecId <<   8);
+	rec.requestIdB0     = (mRecId & 0xFF);
+	rec.contentLengthB1 = 0;
+	rec.contentLengthB0 = 8;
+	rec.paddingLength   = 0;
+	rec.reserved        = 0;
+	// Send it
+	write(mFd, &rec, 8);
+
+	// Set appStatus value
+	buffer[0] = 0;
+	buffer[1] = 0;
+	buffer[2] = 0;
+	buffer[3] = 0;
+	// Set protocolStatus value
+	buffer[4] = 0; // FCGI_REQUEST_COMPLETE
+	// Reserved
+	buffer[5] = 0;
+	buffer[6] = 0;
+	buffer[7] = 0;
+	// Send it
+	write(mFd, buffer, 8);
 }
 
 void ServerFastcgi::serverEvent(void)
@@ -340,6 +480,7 @@ void ServerFastcgi::serverEvent(void)
 		// Create a new object to handle client connection
 		client = new ServerFastcgi();
 		client->setClient(fd);
+		client->setRouter(mRouter);
 
 		mClients.push_back(client);
 

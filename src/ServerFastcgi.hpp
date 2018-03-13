@@ -17,6 +17,7 @@
 
 #include <vector>
 #include "Request.hpp"
+#include "Response.hpp"
 #include "Server.hpp"
 
 namespace hermod {
@@ -37,6 +38,7 @@ protected:
 	void clientDecodeParam(unsigned int len);
 	void clientEvent(void);
 	void serverEvent(void);
+	void sendEndRequest(void);
 private:
 	int mMode;
 	int mPort;
@@ -47,7 +49,10 @@ private:
 	unsigned char *mRxBuffer;
 	unsigned int   mRxLength;
 private:
+	unsigned short mRecId;
+	String   *mBody;
 	Request  *mRequest;
+	Response *mResponse;
 };
 
 } // namespace hermod
