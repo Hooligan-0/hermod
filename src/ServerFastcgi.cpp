@@ -258,24 +258,39 @@ void ServerFastcgi::clientEvent(void)
 		{
 			if (recLen)
 			{
-				int bodyLength = 0;
-				// Search body (content) length into HTTP headers
-				String contentLength = mRequest->getParam("CONTENT_LENGTH");
-				if ( ! contentLength.isEmpty())
-					bodyLength = contentLength.toInt();
-				if (bodyLength > 0)
+				char *pIn, *pOut;
+				unsigned int j;
+
+				if (mBody)
 				{
-					unsigned int j;
-					char *pIn, *pOut;
+					String *newBody;
+					String *oldBody = mBody;
+					// Allocate a String to hold body, and get it
+					newBody = new String();
+					newBody->reserve(oldBody->length() + recLen);
+					// Copy already saved datas
+					pIn  = oldBody->data();
+					pOut = newBody->data();
+					for (j = 0; j < oldBody->length(); j++)
+						*pOut++ = *pIn++;
+					// Append received data into new buffer
+					pIn  = (char *)mRxBuffer;
+					for (j = 0; j < recLen; j++)
+						*pOut++ = *pIn++;
+
+					mBody = newBody;
+					delete oldBody;
+				}
+				else
+				{
 					// Allocate a String to hold body, and get it
 					mBody = new String();
-					mBody->reserve(len);
+					mBody->reserve(recLen);
+					// Copy received data into new buffer
 					pIn  = (char *)mRxBuffer;
 					pOut = mBody->data();
 					for (j = 0; j < recLen; j++)
-					{
 						*pOut++ = *pIn++;
-					}
 				}
 			}
 			if (recLen == 0)
