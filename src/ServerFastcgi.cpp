@@ -131,23 +131,35 @@ void ServerFastcgi::clientDecodeParam(unsigned int len)
 	// A packet may contains multiple parameters, decode each
 	for (unsigned int i = 0; i < len; )
 	{
-		char argName[64];
-		char argValue[64];
+		int nameLen, valueLen;
+		char argName [128];
+		char argValue[128];
+
+		if (ptr[0] & 0x80)
+		{
+			Log::error() << "Server: HTTP Parameter name too long " << nameLen << Log::endl;
+			return;
+		}
+		if (ptr[1] & 0x80)
+		{
+			Log::error() << "Server: HTTP Parameter value too long " << valueLen << Log::endl;
+			return;
+		}
 
 		// First two bytes contains fields lengths
-		int nameLen  = ptr[0];
-		int valueLen = ptr[1];
+		nameLen  = ptr[0];
+		valueLen = ptr[1];
 
 		ptr += 2;
 		i   += 2;
 
 		// Extract the parameter name
-		bzero(argName, 64);
+		bzero(argName, 128);
 		strncpy(argName, (char *)ptr, nameLen);
 		ptr += nameLen;
 		i   += nameLen;
 		// Extract the parameter value
-		bzero(argValue, 64);
+		bzero(argValue, 128);
 		strncpy(argValue, (char *)ptr, valueLen);
 		ptr += valueLen;
 		i   += valueLen;
