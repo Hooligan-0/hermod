@@ -35,7 +35,7 @@ public:
 	void start(void);
 	void stop (void);
 protected:
-	void clientDecodeParam(unsigned int len);
+	void clientDecodeParam(void);
 	void clientEvent(void);
 	void serverEvent(void);
 	void sendEndRequest(void);
@@ -50,6 +50,7 @@ private:
 	unsigned int   mRxLength;
 private:
 	unsigned short mRecId;
+	String   *mHeaders;
 	String   *mBody;
 	Request  *mRequest;
 	Response *mResponse;

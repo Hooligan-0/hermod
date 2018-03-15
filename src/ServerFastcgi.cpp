@@ -67,6 +67,7 @@ ServerFastcgi::ServerFastcgi()
 	mRxBuffer = 0;
 	mRxHeaderLength = 0;
 	mBody = 0;
+	mHeaders  = 0;
 
 	mRequest  = 0;
 	mResponse = 0;
@@ -111,25 +112,30 @@ ServerFastcgi::~ServerFastcgi()
 		delete mBody;
 		mBody = 0;
 	}
+	// If a Body has been allocated and not pushed into Request
+	if (mHeaders)
+	{
+		delete mHeaders;
+		mHeaders = 0;
+	}
 }
 
 /**
  * @brief Decode a FCGI packet with parameters
  *
- * @param len Length of the received data packet (withour padding)
  */
-void ServerFastcgi::clientDecodeParam(unsigned int len)
+void ServerFastcgi::clientDecodeParam(void)
 {
 	char *ptr;
 
 	// Sanity check
-	if (mRxBuffer == 0)
+	if (mHeaders == 0)
 		return;
 
-	ptr = (char *)mRxBuffer;
+	ptr = (char *)mHeaders->data();
 
 	// A packet may contains multiple parameters, decode each
-	for (unsigned int i = 0; i < len; )
+	for (unsigned int i = 0; i < mHeaders->length(); )
 	{
 		int nameLen, valueLen;
 		char argName [128];
@@ -250,9 +256,50 @@ void ServerFastcgi::clientEvent(void)
 		else if (rec->type == FCGI_PARAMS)
 		{
 			if (recLen)
-				clientDecodeParam(recLen);
+			{
+				char *pIn, *pOut;
+				unsigned int j;
+
+				if (mHeaders)
+				{
+					String *newHeaders;
+					String *oldHeaders = mHeaders;
+					// Allocate a String to hold HTTP headers, and get it
+					newHeaders = new String();
+					newHeaders->reserve(oldHeaders->length() + recLen);
+					// Copy already saved datas
+					pIn  = oldHeaders->data();
+					pOut = newHeaders->data();
+					for (j = 0; j < oldHeaders->length(); j++)
+						*pOut++ = *pIn++;
+					// Append received data into new buffer
+					pIn  = (char *)mRxBuffer;
+					for (j = 0; j < recLen; j++)
+						*pOut++ = *pIn++;
+
+					mHeaders = newHeaders;
+					delete oldHeaders;
+				}
+				else
+				{
+					// Allocate a String to hold HTTP headers, and get it
+					mHeaders = new String();
+					mHeaders->reserve(recLen);
+					// Copy received data into new buffer
+					pIn  = (char *)mRxBuffer;
+					pOut = mHeaders->data();
+					for (j = 0; j < recLen; j++)
+						*pOut++ = *pIn++;
+				}
+			}
 			if (recLen == 0)
+			{
+				if (mHeaders)
+				{
+					clientDecodeParam();
+				}
 				mState = 2;
+			}
 		}
 		else if (rec->type == FCGI_STDIN)
 		{
