@@ -463,7 +463,10 @@ void ServerFastcgi::processFd(int fd)
 					{
 						if (client != (*it))
 							continue;
+						// Remove client from local cache
 						mClients.erase(it);
+						// Delete it
+						delete client;
 						break;
 					}
 				}
