@@ -26,6 +26,7 @@ namespace hermod {
  */
 Router::Router(void)
 {
+	mRoutes.clear();
 	mTargets.clear();
 }
 
@@ -35,6 +36,13 @@ Router::Router(void)
  */
 Router::~Router()
 {
+	// Clear the route(s) cache
+	while(mRoutes.size())
+	{
+		Route *r = mRoutes.back();
+		mRoutes.pop_back();
+		delete r;
+	}
 	// Clear the target cache
 	while(mTargets.size())
 	{
@@ -42,6 +50,29 @@ Router::~Router()
 		mTargets.pop_back();
 		delete target;
 	}
+}
+
+/**
+ * @brief This method create a new Route and register it into router
+ *
+ * @param  uri    String that contains the URI
+ * @param  target Pointer to the RouteTarget to use for requests on this route
+ * @return Route* Pointer the the newly allocated Route.
+ */
+Route *Router::createRoute(String &uri, RouteTarget *target)
+{
+	Route *route;
+
+	// Instanciate a ne Route object
+	route = new Route();
+	// Configure it
+	route->setUri(uri);
+	route->setTarget(target);
+
+	// Register this Route into local Router cache
+	mRoutes.push_back(route);
+
+	return route;
 }
 
 /**
@@ -84,73 +115,63 @@ RouteTarget *Router::createTarget(Module *module, const String &name, bool en)
 /**
  * @brief Find a route based on an URI or a system name
  *
- * @param uri Reference to the URI (or name) to find
- * @return RouteTarget* Pointer to a route if URI is found
+ * @param  uri Reference to the URI (or name) to find
+ * @return Route* Pointer to a route if URI is found
  */
-RouteTarget *Router::find(const String &uri)
+Route *Router::find(const String &uri)
 {
-	RouteTarget *target = 0;
+	Route *route = 0;
 
 	try {
-		ConfigKey *cfgRoute = findConfigRoute(uri);
-		// If no valid route found :( Nothing more to do
-		if (cfgRoute == 0)
-			return NULL;
-
-		// Find a target for this route
-		target = this->findTarget(cfgRoute->getValue());
-		if (target == NULL)
+		// Parse all entries of Route cache
+		std::vector<Route *>::iterator it;
+		for (it = mRoutes.begin(); it != mRoutes.end(); ++it)
 		{
-			Log::warning() << "Router: No loaded module or page match route ";
-			Log::warning() << cfgRoute->getValue() << Log::endl;
+			if (! ((*it) == uri))
+				continue;
+			route = (*it);
+			break;
+		}
+		if (route == NULL)
+		{
+			Log::warning() << "Router: No loaded module or page match route "
+			               << uri << Log::endl;
 		}
 	} catch (std::exception &e) {
 		Log::error() << "Router error: " << e.what() << Log::endl;
 		return NULL;
 	}
 
-	return target;
+	return route;
 }
 
 /**
  * @brief Find a route based on a Request
  *
- * @param r Pointer to the source Request
- * @return RouteTarget* Pointer to a route if URI is found
+ * @param  r      Pointer to the source Request
+ * @return Route* Pointer to a route if URI is found
  */
-RouteTarget *Router::find(Request *r)
+Route *Router::find(Request *r)
 {
 	String uri = r->getUri(0);
 	if (uri.isEmpty())
 		uri = ":index:";
 	
-	RouteTarget *target;
+	Route *route = 0;
 
 	try {
-		// Find the route into config
-		ConfigKey *cfgRoute = findConfigRoute(uri);
-		// If no route found, end
-		if (cfgRoute == 0)
-			return 0;
+		route = find(uri);
 
-		// Find a target for this route
-		target = findTarget(cfgRoute->getValue());
 		// If a valid target has been found
-		if (target)
+		if (route)
 			// Update Request URI and args
-			r->setUri( cfgRoute->getName() );
-		else
-		{
-			Log::warning() << "Router: No loaded module or page match route ";
-			Log::warning() << cfgRoute->getValue() << Log::endl;
-		}
-
+			r->setUri( route->getUri() );
 	} catch (std::exception &e) {
 		Log::error() << "Router error: " << e.what() << Log::endl;
 		return NULL;
 	}
 
-	return target;
+	return route;
 }
 
 /**
@@ -170,7 +191,7 @@ ConfigKey *Router::findConfigRoute(const String &uri)
 			key = cfg->getKey("route", i);
 			if (key == 0)
 				break;
-			
+
 			String routeUri = key->getName();
 			if (routeUri == uri.left(routeUri.length()) )
 				break;
@@ -268,6 +289,46 @@ void Router::removeTarget(RouteTarget *target)
 		
 		// Element has been removed, nothing more to do
 		break;
+	}
+}
+
+/**
+ * @brief Load (or reload) list of Route(s) defined into config file
+ *
+ */
+void Router::reloadConfig(void)
+{
+	Config    *cfg = Config::getInstance();
+
+	try {
+		ConfigKey   *key    = 0;
+		RouteTarget *target = 0;
+		Route       *route  = 0;
+
+		for(int i = 0; ;++i)
+		{
+			key = cfg->getKey("route", i);
+			if (key == 0)
+				break;
+
+			String routeUri = key->getName();
+
+			// Find a target for this route
+			target = this->findTarget( key->getValue() );
+			if (target == 0)
+			{
+				Log::warning() << "Router: Failed to (re)load config for URI "
+				               << routeUri << Log::endl;
+				continue;
+			}
+
+			route = createRoute(routeUri, target);
+			if (route == 0)
+				throw std::runtime_error("Failed to create route");
+			Log::debug() << "  - " << routeUri << Log::endl;
+		}
+	} catch (std::exception &e) {
+		Log::info() << "Router error: " << e.what() << Log::endl;
 	}
 }
 

@@ -15,7 +15,7 @@
 TARGET = hermod
 SRC  = main.cpp App.cpp Config.cpp ConfigKey.cpp Log.cpp Request.cpp String.cpp
 SRC += Module.cpp ModuleCache.cpp
-SRC += Router.cpp RouteTarget.cpp
+SRC += Router.cpp Route.cpp RouteTarget.cpp
 SRC += Page.cpp Session.cpp SessionCache.cpp
 SRC += Server.cpp ServerFastcgi.cpp ServerLibFcgi.cpp
 SRC += Content.cpp
@@ -29,6 +29,7 @@ INSTALL="/usr/local"
 
 CC = c++
 CFLAGS   = -Wall -Wextra -Wuninitialized -Wunused-label -Wunused-value -Wunused-variable -Wno-unknown-pragmas
+CFLAGS  += -g
 CFLAGS  += -DINSTALL=\"$(INSTALL)\"
 LDFLAGS  = -lfcgi -lfcgi++
 LDFLAGS += -ldl -rdynamic

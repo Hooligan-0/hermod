@@ -346,7 +346,11 @@ void ServerFastcgi::clientEvent(void)
 				mRequest->setBody(mBody);
 				mBody = 0;
 
-				RouteTarget *route = mRouter->find(mRequest);
+				Route *r = mRouter->find(mRequest);
+				RouteTarget *route = 0;
+
+				if (r)
+					route = r->getTarget();
 				if (route)
 				{
 					Page *page = route->newPage();

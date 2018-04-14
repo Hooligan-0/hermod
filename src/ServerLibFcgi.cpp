@@ -165,12 +165,20 @@ void ServerLibFcgi::processFd(int fd)
 	else if ( (req->getMethod() == Request::Get) ||
 	          (req->getMethod() == Request::Post) )
 	{
-		RouteTarget *route = mRouter->find(req);
+		RouteTarget *route = 0;
+		Route *r;
+
+		r = mRouter->find(req);
+		if (r)
+			route = r->getTarget();
 		if ( ! route)
 		{
+			Route *r;
 			Log::info() << "Request an unknown URL: ";
 			Log::info() << req->getUri(0) << Log::endl;
-			route = mRouter->find(":404:");
+			r = mRouter->find(":404:");
+			if (r)
+				route = r->getTarget();
 		}
 		if (route)
 		{

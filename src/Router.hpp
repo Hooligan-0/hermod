@@ -17,6 +17,7 @@
 
 #include <vector>
 #include "Config.hpp"
+#include "Route.hpp"
 #include "RouteTarget.hpp"
 #include "String.hpp"
 
@@ -35,16 +36,19 @@ class Router
 public:
 	Router (void);
 	~Router();
+	Route       *createRoute(String &uri, RouteTarget *target);
 	RouteTarget *createTarget(Module *module);
 	RouteTarget *createTarget(Module *module, const String &name, bool en = true);
+	void reloadConfig(void);
 	void removeTarget(RouteTarget *target);
-	RouteTarget *find(const String &uri);
-	RouteTarget *find(Request *r);
+	Route       *find(const String &uri);
+	Route       *find(Request *r);
 protected:
 	ConfigKey   *findConfigRoute(const String &uri);
 	RouteTarget *findTarget(const String &module, const String &page);
 	RouteTarget *findTarget(const String &pair);
 private:
+	std::vector<Route *>       mRoutes;
 	std::vector<RouteTarget *> mTargets;
 };
 

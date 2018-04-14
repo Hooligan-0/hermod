@@ -223,6 +223,9 @@ App* App::init(void)
 		pos++;
 	}
 
+	// Load Routes (after loading modules)
+	mRouter->reloadConfig();
+
 	try {
 		ConfigKey *cfgKey;
 		// Get the server type from config
