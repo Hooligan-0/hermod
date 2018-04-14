@@ -1,7 +1,7 @@
 /*
  * Hermod - Modular application framework
  *
- * Copyright (c) 2016 Cowlab
+ * Copyright (c) 2016-2018 Cowlab
  *
  * Hermod is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License 
@@ -31,7 +31,9 @@ public:
 	ModuleCache();
 	~ModuleCache();
 	void    clear(void);
+	int     count(void);
 	Module *find (const String &name);
+	Module *get  (unsigned int pos);
 	Module *load (const String &name);
 	void    unload(int );
 private:

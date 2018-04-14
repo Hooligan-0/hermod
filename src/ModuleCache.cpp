@@ -1,7 +1,7 @@
 /*
  * Hermod - Modular application framework
  *
- * Copyright (c) 2016 Cowlab
+ * Copyright (c) 2016-2018 Cowlab
  *
  * Hermod is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License 
@@ -47,6 +47,16 @@ void ModuleCache::clear(void)
 }
 
 /**
+ * @brief Get the number of Modules into this cache object
+ *
+ * @return integet Number of known modules
+ */
+int  ModuleCache::count(void)
+{
+	return mModules.size();
+}
+
+/**
  * @brief Find a module identified by his name
  *
  * @return Module* Pointer to the module object (or NULL)
@@ -68,6 +78,28 @@ Module *ModuleCache::find(const String &name)
 	return module;
 }
 
+/**
+ * @brief Get a Module at a specific cache position
+ *
+ * @param  pos     Position of the module to get
+ * @return Module* Pointer to the module object (or NULL)
+ */
+Module * ModuleCache::get(unsigned int pos)
+{
+	// If the requested position is greater than cache size, return null
+	if (pos >= mModules.size())
+		return 0;
+
+	// Return the Module (pointer) at the specified position
+	return mModules.at(pos);
+}
+
+/**
+ * @brief Load a module defined by his name
+ *
+ * @param  name String with the name of the module to load
+ * @return Module* Pointer to the newly loaded module (or null if error)
+ */
 Module * ModuleCache::load(const String &name)
 {
 	Config *cfg = Config::getInstance();
@@ -109,6 +141,11 @@ Module * ModuleCache::load(const String &name)
 	return newModule;
 }
 
+/**
+ * @brief Unload a previously loaded Module
+ *
+ * @param index Position into the cache of the module to unload
+ */
 void ModuleCache::unload(int index)
 {
 	Module *mod;
