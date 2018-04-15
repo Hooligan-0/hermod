@@ -53,21 +53,6 @@ void RouteTarget::enable(void)
 }
 
 /**
- * @brief Free an allocated page of the target (see newPage)
- *
- * @param page Pointer to the Page object to free
- */
-void RouteTarget::freePage(Page *page)
-{
-	// Sanity check
-	if ( (page == NULL) || (mModule == NULL) )
-		return;
-
-	// Call module to free the page
-	mModule->freePage(page);
-}
-
-/**
  * @brief Get the Module that contains the page of this target
  *
  * @return Module* Pointer to the module
@@ -95,23 +80,6 @@ const String &RouteTarget::getName(void)
 bool RouteTarget::isEnabled(void)
 {
 	return mValid;
-}
-
-/**
- * @brief Allocate a page of this target type
- *
- * @return Page* Pointer to the newlly allocated Page
- */
-Page *RouteTarget::newPage(void)
-{
-	// Sanity check
-	if (mModule == NULL)
-		return NULL;
-	if (mName.isEmpty())
-		return NULL;
-
-	// Call Module to allocated hitself the requested page
-	return mModule->newPage(mName);
 }
 
 /**

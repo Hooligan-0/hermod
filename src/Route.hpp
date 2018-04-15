@@ -33,8 +33,10 @@ class Route
 public:
 	Route (void);
 	~Route();
+	void    freePage(Page *page);
 	RouteTarget *getTarget(void);
 	String      &getUri(void);
+	Page   *newPage (void);
 	void    setTarget(RouteTarget *target);
 	void    setUri   (const String &uri);
 public:

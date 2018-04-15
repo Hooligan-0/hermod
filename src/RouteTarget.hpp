@@ -42,9 +42,6 @@ public:
 	const String &getName(void);
 	void    setModule(Module *module);
 	void    setName  (const String &name);
-	// Handle Pages
-	Page   *newPage (void);
-	void    freePage(Page *page);
 private:
 	bool    mValid;
 	String  mName;
