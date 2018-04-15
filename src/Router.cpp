@@ -26,6 +26,7 @@ namespace hermod {
  */
 Router::Router(void)
 {
+	mModules = 0;
 	mRoutes.clear();
 	mTargets.clear();
 }
@@ -35,6 +36,15 @@ Router::Router(void)
  *
  */
 Router::~Router()
+{
+	clean();
+}
+
+/**
+ * @brief Remove all the routes and targets loaded into the Router
+ *
+ */
+void Router::clean(void)
 {
 	// Clear the route(s) cache
 	while(mRoutes.size())
@@ -293,11 +303,36 @@ void Router::removeTarget(RouteTarget *target)
 }
 
 /**
- * @brief Load (or reload) list of Route(s) defined into config file
+ * @brief Load (or reload) list of available Route(s)
  *
  */
-void Router::reloadConfig(void)
+void Router::reload(void)
 {
+	// Clear the current router config (if any)
+	clean();
+
+	// First, reload routes and Target defined by Modules
+	try {
+		if (!mModules)
+			throw std::runtime_error("Module cache not available");
+
+		// Search all available modules
+		for (int i = 0; i < mModules->count(); ++i)
+		{
+			Module *mod;
+			// Get access to next module
+			mod = mModules->get(i);
+			if (!mod)
+				continue;
+			// Call initRouter, the module will reload his rules by itself
+			mod->initRouter(this);
+		}
+	} catch (std::exception &e) {
+		Log::info() << "Router: Failed to (re)load routes: " << e.what() << Log::endl;
+	}
+
+	// Second, reload routes defined into config file
+
 	Config    *cfg = Config::getInstance();
 
 	try {
@@ -325,11 +360,25 @@ void Router::reloadConfig(void)
 			route = createRoute(routeUri, target);
 			if (route == 0)
 				throw std::runtime_error("Failed to create route");
-			Log::debug() << "  - " << routeUri << Log::endl;
 		}
 	} catch (std::exception &e) {
 		Log::info() << "Router error: " << e.what() << Log::endl;
 	}
+}
+
+/**
+ * @brief Define the ModuleCache to use when search/access Modules
+ *
+ * For some operations, Router need to access Modules directly. For example when
+ * the list of routes is loaded/reloaded, Router will call each module to allow
+ * them to insert they own rules. This method set the cache that contains the
+ * list of available modules.
+ *
+ * @param mc Pointer to the ModuleCache to use
+ */
+void Router::setModuleCache(ModuleCache *mc)
+{
+	mModules = mc;
 }
 
 } // namespace hermod

@@ -216,15 +216,14 @@ App* App::init(void)
 		// Try to load the specified module
 		Module *newModule = mModuleCache.load( name );
 		if (newModule)
-		{
-			newModule->initRouter(mRouter);
 			Log::info() << "Load module " << name << Log::endl;
-		}
 		pos++;
 	}
 
+	// Give access to the ModuleCache for the Router
+	mRouter->setModuleCache(&mModuleCache);
 	// Load Routes (after loading modules)
-	mRouter->reloadConfig();
+	mRouter->reload();
 
 	try {
 		ConfigKey *cfgKey;
