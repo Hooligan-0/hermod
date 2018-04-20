@@ -38,7 +38,7 @@ public:
 	Router (void);
 	~Router();
 	void clean(void);
-	Route       *createRoute(String &uri, RouteTarget *target);
+	Route       *createRoute(const String &uri, RouteTarget *target);
 	RouteTarget *createTarget(Module *module);
 	RouteTarget *createTarget(Module *module, const String &name, bool en = true);
 	void reload(void);

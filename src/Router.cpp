@@ -69,7 +69,7 @@ void Router::clean(void)
  * @param  target Pointer to the RouteTarget to use for requests on this route
  * @return Route* Pointer the the newly allocated Route.
  */
-Route *Router::createRoute(String &uri, RouteTarget *target)
+Route *Router::createRoute(const String &uri, RouteTarget *target)
 {
 	Route *route;
 
