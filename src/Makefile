@@ -45,7 +45,12 @@ all: $(COBJ)
 	@$(CC) $(CFLAGS) -o $(TARGET) $(COBJ) $(DBOBJ) $(LDFLAGS)
 
 install:
-	cp $(TARGET) $(INSTALL)/bin/
+	@echo "  [CP] Install binary file (" $(TARGET) ")"
+	@cp $(TARGET) $(INSTALL)/bin/
+	@echo "  [CP] Install headers files (*.hpp)"
+	@cp *.hpp $(INSTALL)/include/hermod/
+	@cp ContentHtml/*.hpp $(INSTALL)/include/hermod/ContentHtml/
+	@cp ContentJson/*.hpp $(INSTALL)/include/hermod/ContentJson/
 
 check:
 	@echo "  [CPPCHECK] ."
