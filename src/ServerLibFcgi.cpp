@@ -1,7 +1,7 @@
 /*
  * Hermod - Modular application framework
  *
- * Copyright (c) 2016-2018 Cowlab
+ * Copyright (c) 2016-2019 Cowlab
  *
  * Hermod is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License 
@@ -153,7 +153,7 @@ void ServerLibFcgi::processFd(int fd)
 	rsp = new Response( req );
 	rsp->setServer(this);
 
-	if (req->getMethod() == Request::Option)
+	if (req->getMethod() == Request::Options)
 	{
 		ResponseHeader *rh = rsp->header();
 		rh->addHeader("Allow", "HEAD,GET,PUT,DELETE,OPTIONS");
@@ -162,8 +162,12 @@ void ServerLibFcgi::processFd(int fd)
 		if ( ! corsMethod.empty() )
 			rh->addHeader("Access-Control-Allow-Method", corsMethod);
 	}
-	else if ( (req->getMethod() == Request::Get) ||
-	          (req->getMethod() == Request::Post) )
+	else if (req->getMethod() == Request::Undef)
+	{
+		Log::info() << "App: Unknown method for this request :(" << Log::endl;
+		rsp->header()->setRetCode(405);
+	}
+	else
 	{
 		Route *route = 0;
 
@@ -209,11 +213,6 @@ void ServerLibFcgi::processFd(int fd)
 			Log::info() << "No page in config for '404' error" << Log::endl;
 			rsp->header()->setRetCode(404, "Not found");
 		}
-	}
-	else
-	{
-		Log::info() << "App: Unknown method for this request :(" << Log::endl;
-		rsp->header()->setRetCode(404, "Not found");
 	}
 
 	rsp->send();

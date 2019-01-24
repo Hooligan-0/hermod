@@ -1,7 +1,7 @@
 /*
  * Hermod - Modular application framework
  *
- * Copyright (c) 2016-2018 Cowlab
+ * Copyright (c) 2016-2019 Cowlab
  *
  * Hermod is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License 
@@ -161,12 +161,38 @@ Request::Method Request::getMethod(void)
 		return mMethod;
 
 	String method = getParam("REQUEST_METHOD");
-	if (method == "OPTIONS")
-		mMethod = Option;
-	else if (method == "GET")
+	/* First search into HTTP/1.0 methods (RFC1945 chap 8) */
+	if (method == "GET")
 		mMethod = Get;
+	else if (method == "HEAD")
+		mMethod = Head;
 	else if (method == "POST")
 		mMethod = Post;
+	/* HTTP/1.0 additional methods (RFC1945 Appendix D1) */
+	else if (method == "PUT")
+		mMethod = Put;
+	else if (method == "DELETE")
+		mMethod = Delete;
+	else if (method == "LINK")
+		mMethod = Link;
+	else if (method == "UNLINK")
+		mMethod = Unlink;
+	// HTTP/1.1 (RFC2068 and RFC7231)
+	else if (method == "OPTIONS")
+		mMethod = Options;
+	else if (method == "TRACE")
+		mMethod = Trace;
+	// HTTP/1.1 (RFC2616 and RFC7231)
+	else if (method == "CONNECT")
+		mMethod = Connect;
+	// HTTP/1.1 Extension (RFC5789)
+	else if (method == "PATCH")
+		mMethod = Patch;
+	else
+	{
+		Log::debug() << "Request::getMethod "
+		             << "Unknown method " << method << Log::endl;
+	}
 
 	return mMethod;
 }

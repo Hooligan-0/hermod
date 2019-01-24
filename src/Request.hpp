@@ -1,7 +1,7 @@
 /*
  * Hermod - Modular application framework
  *
- * Copyright (c) 2016-2018 Cowlab
+ * Copyright (c) 2016-2019 Cowlab
  *
  * Hermod is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License 
@@ -34,7 +34,11 @@ namespace hermod {
 class Request
 {
 public:
-	enum Method { Undef, Get, Post, Option };
+	enum Method { Undef,
+	              Get, Head, Post,
+	              Put, Delete, Link, Unlink,
+	              Connect, Options, Trace,
+	              Patch };
 public:
 	explicit Request(Server *server);
 	~Request();

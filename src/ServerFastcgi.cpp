@@ -1,7 +1,7 @@
 /*
  * Hermod - Modular application framework
  *
- * Copyright (c) 2016-2018 Cowlab
+ * Copyright (c) 2016-2019 Cowlab
  *
  * Hermod is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License 
@@ -347,7 +347,12 @@ void ServerFastcgi::clientEvent(void)
 				mBody = 0;
 
 				Route *route = mRouter->find(mRequest);
-
+				if ( ! route)
+				{
+					Log::info() << "Server: Not found: "
+					            << mRequest->getUri(0) << Log::endl;
+					route = mRouter->find(":404:");
+				}
 				if (route)
 				{
 					Page *page = route->newPage();
@@ -371,6 +376,8 @@ void ServerFastcgi::clientEvent(void)
 						mResponse->header()->setRetCode(404, "Not found");
 					}
 				}
+				else
+					mResponse->header()->setRetCode(404, "Not found");
 
 				mResponse->send();
 				sendEndRequest();

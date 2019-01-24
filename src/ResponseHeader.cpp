@@ -1,7 +1,7 @@
 /*
  * Hermod - Modular application framework
  *
- * Copyright (c) 2016 Cowlab
+ * Copyright (c) 2016-2019 Cowlab
  *
  * Hermod is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License 
@@ -68,6 +68,43 @@ void ResponseHeader::setRetCode(int code, const String &reason)
 {
 	mRetCode   = code;
 	mRetReason = reason;
+}
+
+/**
+ * @brief Set the status code returned with the Response
+ *
+ * @param code The status code to return with Response
+ */
+void ResponseHeader::setRetCode(int code)
+{
+	mRetCode = code;
+
+	switch (mRetCode)
+	{
+		// Informational 1xx
+		case 100: mRetReason = "Continue";    break;
+		case 101: mRetReason = "Switching Protocols"; break;
+		// Successful 2xx
+		case 200: mRetReason = "OK";          break;
+		case 201: mRetReason = "Created";     break;
+		case 204: mRetReason = "No Content";  break;
+		case 202: mRetReason = "Accepted";    break;
+		// Redirection 3xx
+		case 301: mRetReason = "Moved Permanently";   break;
+		case 302: mRetReason = "Found";       break;
+		// Client Error 4xx
+		case 400: mRetReason = "Bad Request"; break;
+		case 403: mRetReason = "Forbidden";   break;
+		case 404: mRetReason = "Not Found";   break;
+		case 405: mRetReason = "Method Not Allowed";  break;
+		// Server Error 5xx
+		case 500: mRetReason = "Internal Server Error"; break;
+		case 501: mRetReason = "Not Implemented";       break;
+		case 502: mRetReason = "Bad Gateway";           break;
+		case 503: mRetReason = "Service Unavailable";   break;
+		case 504: mRetReason = "Gateway Timeout";       break;
+		case 505: mRetReason = "Version Not Supported"; break;
+	}
 }
 
 /**

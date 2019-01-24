@@ -1,7 +1,7 @@
 /*
  * Hermod - Modular application framework
  *
- * Copyright (c) 2016 Cowlab
+ * Copyright (c) 2016-2019 Cowlab
  *
  * Hermod is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License 
@@ -31,6 +31,7 @@ public:
 
 	void setContentType(const String &type);
 	void setRetCode(int code, const String &reason);
+	void setRetCode(int code);
 
 	String getHeader(void);
 
