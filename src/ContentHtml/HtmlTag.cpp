@@ -36,7 +36,22 @@ HtmlTag::HtmlTag(const std::string &tag) : mTagName(tag)
 void HtmlTag::renderHead(void)
 {
 	std::ostringstream ss;
-	ss << "<" << mTagName << ">";
+	ss << "<" << mTagName;
+	if (mAttributes.size() > 0)
+	{
+		std::vector<HtmlAttribute *>::iterator it;
+		for (it = mAttributes.begin(); it != mAttributes.end(); ++it)
+		{
+			// Insert a space separator before attribute
+			ss << " ";
+			// Insert attribute value "key=value"
+			ss << (*it)->getName();
+			ss << "=\"";
+			ss << (*it)->getValue();
+			ss << "\"";
+		}
+	}
+	ss << ">";
 	
 	renderAppend(ss.str());
 }

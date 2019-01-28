@@ -1,7 +1,7 @@
 /*
  * Hermod - Modular application framework
  *
- * Copyright (c) 2016 Cowlab
+ * Copyright (c) 2016-2019 Cowlab
  *
  * Hermod is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License 
@@ -16,6 +16,8 @@
 #define CONTENTHTML_ELEMENT_HPP
 #include <string>
 #include <vector>
+#include "../String.hpp"
+#include "HtmlAttribute.hpp"
 
 namespace hermod {
 	namespace contentHtml {
@@ -30,7 +32,9 @@ public:
 	HtmlElement();
 	virtual ~HtmlElement();
 	virtual void add(HtmlElement *element);
-	virtual void add(const std::string &str);
+	virtual void add(const String &str);
+	virtual void addAttribute(HtmlAttribute *attribute);
+	virtual void addAttribute(const String &name, const String &value);
 	virtual void render(void);
 	void setRenderBuffer(std::vector<unsigned char> *buffer);
 protected:
@@ -39,9 +43,10 @@ protected:
 	virtual void renderBody(void);
 	virtual void renderTail(void);
 protected:
-	std::vector<HtmlElement *>  mChildren;
-	std::vector<unsigned char> *mRenderBuffer;
-	std::string mText;
+	std::vector<HtmlAttribute *> mAttributes;
+	std::vector<HtmlElement *>   mChildren;
+	std::vector<unsigned char>  *mRenderBuffer;
+	String mText;
 };
 
 	} // namespace ContentHtml

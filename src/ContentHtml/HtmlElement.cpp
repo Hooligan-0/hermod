@@ -1,7 +1,7 @@
 /*
  * Hermod - Modular application framework
  *
- * Copyright (c) 2016 Cowlab
+ * Copyright (c) 2016-2019 Cowlab
  *
  * Hermod is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License 
@@ -23,6 +23,7 @@ namespace hermod {
  */
 HtmlElement::HtmlElement()
 {
+	mAttributes.clear();
 	mChildren.clear();
 	mRenderBuffer = 0;
 	mText.clear();
@@ -34,6 +35,14 @@ HtmlElement::HtmlElement()
  */
 HtmlElement::~HtmlElement()
 {
+	// Delete attributes of the current element (if any)
+	while( mAttributes.size() )
+	{
+		HtmlAttribute *a = mAttributes.back();
+		mAttributes.pop_back();
+		delete a;
+	}
+	// Delete children nodes (if any)
 	while( mChildren.size() )
 	{
 		HtmlElement *e = mChildren.back();
@@ -57,9 +66,40 @@ void HtmlElement::add(HtmlElement *element)
  *
  * @param text Reference to the string to insert
  */
-void HtmlElement::add(const std::string &text)
+void HtmlElement::add(const String &text)
 {
 	mText += text;
+}
+
+/**
+ * @brief Insert an attribute into this element
+ *
+ * @param attribute Pointer to the attribute to insert
+ */
+void HtmlElement::addAttribute(HtmlAttribute *attribute)
+{
+	mAttributes.push_back(attribute);
+}
+
+/**
+ * @brief Create and insert an attribute based on key/value pair
+ *
+ * @param name  Name of the attribute to add
+ * @param value Value of the attribute
+ */
+void HtmlElement::addAttribute(const String &name, const String &value)
+{
+	// Allocate a new attribute object
+	HtmlAttribute *a = new HtmlAttribute;
+	if (a == 0)
+		return;
+
+	// Configure the new attribute, set name and value
+	a->setName(name);
+	a->setValue(value);
+
+	// Insert this new attribute into local element
+	mAttributes.push_back(a);
 }
 
 /**
@@ -72,7 +112,7 @@ void HtmlElement::renderAppend(const std::string &str)
 	// Sanity check
 	if (mRenderBuffer == 0)
 		return;
-	
+
 	std::copy(str.c_str(),
 	          str.c_str()+str.length(),
 	          std::back_inserter(*mRenderBuffer));

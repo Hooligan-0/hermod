@@ -1,7 +1,7 @@
 ##
  # Hermod - Modular application framework
  #
- # Copyright (c) 2016 Cowlab
+ # Copyright (c) 2016-2019 Cowlab
  #
  # Hermod is free software: you can redistribute it and/or modify
  # it under the terms of the GNU Lesser General Public License 
@@ -19,8 +19,9 @@ SRC += Router.cpp Route.cpp RouteTarget.cpp
 SRC += Page.cpp Session.cpp SessionCache.cpp
 SRC += Server.cpp ServerFastcgi.cpp ServerLibFcgi.cpp
 SRC += Content.cpp
-SRC += ContentHtml.cpp ContentHtml/HtmlElement.cpp ContentHtml/HtmlTag.cpp
-SRC += ContentHtml/HtmlHtml.cpp ContentHtml/HtmlH.cpp ContentHtml/Template.cpp
+SRC += ContentHtml.cpp ContentHtml/HtmlElement.cpp ContentHtml/HtmlAttribute.cpp
+SRC += ContentHtml/HtmlTag.cpp ContentHtml/HtmlHtml.cpp ContentHtml/HtmlH.cpp
+SRC += ContentHtml/Template.cpp
 SRC += ContentJson.cpp ContentJson/JsonElement.cpp ContentJson/JsonObject.cpp
 SRC += ContentJson/JsonArray.cpp ContentJson/JsonString.cpp
 SRC += Response.cpp ResponseHeader.cpp
