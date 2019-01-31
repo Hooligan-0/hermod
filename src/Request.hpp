@@ -39,6 +39,9 @@ public:
 	              Put, Delete, Link, Unlink,
 	              Connect, Options, Trace,
 	              Patch };
+	enum ContentType { typeUndef,
+	                   plainText, urlEncoded, multipartForm
+	};
 public:
 	explicit Request(Server *server);
 	~Request();
@@ -49,16 +52,19 @@ public:
 	String  getUri   (unsigned int n);
 	String  getFormValue (const String &name);
 	String  getCookieByName(const String &name, bool allowEmpty);
+	ContentType getType(void);
 	bool    hasFormValue (const String &name);
 	bool    isAccept(const String &type);
 	void    setBody (String *body);
 	void    setHeaderParameter(const String &name, const String &value);
+	void    setType (ContentType type);
 	void    setUri  (const String &route);
 protected:
 	void    loadFormInputs(void);
 private:
 	Server        *mServer;
 	Method         mMethod;
+	ContentType    mType;
 	String        *mBody;
 	std::vector<String>       mUri;
 	std::map <String, String> mHeaderParameters;

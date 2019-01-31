@@ -30,6 +30,7 @@ Request::Request(Server *server)
 	mBody   = 0;
 	mServer = server;
 	mMethod = Undef;
+	mType   = typeUndef;
 
 	mUri.clear();
 }
@@ -233,6 +234,36 @@ String Request::getFormValue(const String &name)
 }
 
 /**
+ * @brief Get the content-type of the request
+ *
+ * @return ContentType value
+ */
+Request::ContentType Request::getType(void)
+{
+	// If content-type is already known, return it
+	if (mType != typeUndef)
+		return mType;
+
+	String type;
+	type = getParam("CONTENT_TYPE");
+
+	// Search the parameter separator (if any)
+	int sep = type.indexOf(';');
+	// If a separator exists, cut the string to keep only type/subtype
+	if (sep)
+		type.truncate(sep);
+
+	if (type == "multipart/form-data")
+		mType = multipartForm;
+	else if (type == "application/x-www-form-urlencoded")
+		mType = urlEncoded;
+	else if (type == "text/plain")
+		mType = plainText;
+
+	return mType;
+}
+
+/**
  * @brief Get page URI or optional argument
  *
  * @param n Position of the requested argument (0 for URI hitself)
@@ -320,9 +351,14 @@ bool Request::isAccept(const String &type)
  */
 void Request::loadFormInputs(void)
 {
-	Method method = getMethod();
+	if (getType() == typeUndef)
+	{
+		Log::warning() << "Failed to load Form values : "
+		               << "unknown CONTENT_TYPE" << Log::endl;
+		return;
+	}
 
-	if (method == Post)
+	if (getType() == urlEncoded)
 	{
 		String contentLength = getParam("CONTENT_LENGTH");
 		if (contentLength.isEmpty())
@@ -400,8 +436,23 @@ void Request::setHeaderParameter(const String &name, const String &value)
 {
 	mHeaderParameters[ name ] = value;
 
-	if (name == "QUERY_STRING")
-		mUri.push_back(value);
+	if (name == "SCRIPT_NAME")
+	{
+		String u = value.left(1);
+		if (u == "/")
+			u = value.right(value.length() - 1);
+		mUri.push_back(u);
+	}
+}
+
+/**
+ * @brief Set or update the content-type of the request
+ *
+ * @param type Content type to use for this request
+ */
+void Request::setType(ContentType type)
+{
+	mType = type;
 }
 
 /**
@@ -416,9 +467,12 @@ void Request::setUri(const String &route)
 	
 	try {
 		// Get full URI string
-		String args = getParam("QUERY_STRING");
+		String args = getParam("SCRIPT_NAME");
 		if (args.isEmpty())
 			throw runtime_error("Query string empty (or not found)");
+		// If the first char is a '/' remove it
+		if (args.left(1) == "/")
+			args = args.right( args.length() - 1 );
 		// Keep only the tail (where args are)
 		args.remove(0, route.length());
 		if (args.length())

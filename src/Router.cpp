@@ -72,11 +72,18 @@ void Router::clean(void)
 Route *Router::createRoute(const String &uri, RouteTarget *target)
 {
 	Route *route;
+	String routeUri;
+
+	// Remove the first '/' character (if any)
+	if (uri.left(1) == "/")
+		routeUri = uri.right( uri.length() - 1 );
+	else
+		routeUri = uri;
 
 	// Instanciate a ne Route object
 	route = new Route();
 	// Configure it
-	route->setUri(uri);
+	route->setUri(routeUri);
 	route->setTarget(target);
 
 	// Register this Route into local Router cache
